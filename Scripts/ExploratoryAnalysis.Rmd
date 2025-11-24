@@ -174,7 +174,7 @@ This warrants for us to find the variables that contribute most to the personali
 # Variable Importance 
 Recall that all of our predictor variables are numeric and in the summary stats table above we have the means across each variable. We can deploy an ANOVA test to check whether there is any significant difference between the variables. This tells us how much each numeric variable differs between personality groups. In other words the variable that contributes most to the personality type would be the one with highest F-value. 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(broom)
 library(purrr)
 

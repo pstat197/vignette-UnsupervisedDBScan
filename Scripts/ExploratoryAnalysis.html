@@ -3059,13 +3059,9 @@ variable differs between personality groups. In other words the variable
 that contributes most to the personality type would be the one with
 highest F-value.</p>
 <pre class="r"><code>library(broom)
-library(purrr)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;purrr&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:caret&#39;:
-## 
-##     lift</code></pre>
-<pre class="r"><code># Exclude personality_type (response)
+library(purrr)
+
+# Exclude personality_type (response)
 numeric_vars &lt;- personality %&gt;% 
   select(where(is.numeric))
 
