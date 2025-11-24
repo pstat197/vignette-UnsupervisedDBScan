@@ -1,0 +1,206 @@
+---
+title: "Exploratory Analysis: Getting Familiar with the Dataset"
+author: "Aarti Garaye"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    df_print: paged
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading Necessary Libraries and Data
+```{r, warning=FALSE, message=FALSE}
+library(readr)
+library(readxl)
+library(visdat)
+library(dplyr)
+library(caret)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(tidyr)
+
+personality <- read.csv("../data/raw/personality_synthetic_dataset.csv")
+```
+This is a synthetic dataset designed to simulate human personality types — Introvert, Extrovert, and Ambivert — based on various behavioral and psychological traits.
+
+This dataset can be used for:
+
+Personality classification
+Clustering similar personality profiles
+Behavioral analysis
+Feature importance studies
+
+Our target or response variable will be "Personality Type." This makes it a three class classification problem. 
+
+All feature values are numerical and scaled from 0 (low) to 10 (high)
+
+This dataset was synthetically generated using Python and NumPy. Feature distributions were modeled with class-specific means and added noise using a normal distribution to simulate natural variation.
+
+# Disclaimer
+
+**This is a synthetic dataset created for research, learning, and experimental purposes only. It does not represent real individuals or real-world psychometrics.**
+
+
+# Structure of the dataset
+```{r}
+personality %>%
+  summarise(across(everything(), ~ class(.x)[1])) %>%
+  pivot_longer(everything(), names_to = "column", values_to = "class") %>%
+  kable(col.names = c("Column Name", "Class"), caption = "Variable Type in the Dataset") %>%
+  scroll_box(height = "200px")
+```
+
+The number of rows are `r nrow(personality)` whereas the number of columns are `r ncol(personality)`. 
+
+## Missing Data
+This is synthetically simulated data so we don't expect any discrepencies. We have already check about the missing values and duplicates in the data cleaning process. We will add a vis miss plot here to double check. Furthermore, it is important to note that $0$ values are not missing, they are just values with low scorings for that variable. 
+
+```{r, fig.align='center', fig.cap="As the plot shows above, there are no missing values."}
+vis_miss(personality)
+```
+
+You are welcome to check the data cleaning for more details about missing values and duplicates and near zero variance variables. 
+
+## Class Balance 
+There are three classes we are dealing with, introvert, extrovert, and ambivert. Before we move further any further with this dataset, it is important to check the class balance. If they are balanced it would make our classification process much simpler, otherwise we would have to find some neutral way of dealing with class imbalance. 
+
+We deploy two visuals to check the class balance, a pie chart and a bar plot. Both of these will be good to see the distribution. 
+
+```{r, fig.show='hold', out.width="50%", fig.cap="The figures show that classes are approximately distributed equally. The pie chart shows percentages and even from the bar plot we can see that the nunber of observations across the three classes is approximately the same. This is good for later analysis."}
+personality_counts <- personality %>%
+  count(personality_type)
+
+pie(
+  personality_counts$n,
+  labels = paste0(personality_counts$personality_type, 
+                  " (", round(personality_counts$n / sum(personality_counts$n) * 100, 1), "%)"),
+  main = "Personality Type Distribution"
+)
+
+ggplot(personality_counts, aes(x = personality_type, y = n)) +
+  geom_col(fill = c("beige", "skyblue", "pink"), color = "black") +
+  theme_bw() +
+  labs(title = "Personality Type Bar Chart", x = "Personality Type", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+To highlight this further we can also see the distribution in a form of a table
+```{r}
+personality_counts %>%
+  mutate(percentage = round(n / sum(n) * 100, 1)) %>%
+  rowwise() %>%
+  do({
+    cat(" ", .$personality_type, ": ", .$n, " (", .$percentage, "%)\n", sep = "")
+    data.frame()
+  }) %>%
+  kable(caption = "The table shows the class balance and how observations lie in different classes in the dataset.")
+```
+
+# Summary Statistics
+It's important to have summary statistics of each variable in the dataset. Below is the table showing the summary statistics for each column. 
+```{r}
+personality %>% 
+  select(where(is.numeric)) %>%
+  summary() %>%
+  kbl(caption = "Summary statistic for each variable in the dataset except the response variable", align = "c") %>% 
+  kable_styling(full_width = FALSE) %>%
+  scroll_box(height = "300px")
+```
+
+
+# Feature Analysis
+We want to know which of these variables contribute the most to the personality type. We must also check whether these variables are correlated with each other or not. To do that we will look at the heatmap or the correlation matrix. In the correlation matrix we will only look at the numerical variables. 
+```{r, warning=FALSE, message=FALSE, fig.align='center', fig.cap="The correlation matrix of the varibales"}
+library(ggplot2)
+library(reshape2)
+
+numeric_df <- personality %>% select(where(is.numeric))
+cor_matrix <- cor(numeric_df, use = "pairwise.complete.obs")
+
+# Convert to long format
+cor_long <- melt(cor_matrix)
+
+ggplot(cor_long, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Correlation Heatmap", x = "", y = "")
+```
+
+A lot of the variables are correlated with each other. Some examples of correlated variables are `party-liking` and `public_speaking_comfort`, `social_energy` and `talkativeness`, etc. Feature engineering tells us that we need to add some interraction terms to deal with the correlation between the variables. 
+
+We can further dive into how each of these variables are contributing to the personality types by looking at their of the group boxplots. Some variables we're interested in `party_liking`, `alone_time_preference`, `online_social_uses`, and `listening_skills` 
+
+```{r, fig.show='hold', out.width="50%"}
+ggplot(personality, aes(x = personality_type, y = party_liking)) +
+  geom_boxplot(fill = c("beige", "skyblue", "pink"), alpha = 0.7) +
+  theme_bw() +
+  labs(title = "Party Liking by Personality Type",
+       x = "Personality Type", y = "Party Liking") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(personality, aes(x = personality_type, y = alone_time_preference)) +
+  geom_boxplot(fill = c("beige", "skyblue", "pink"), alpha = 0.7) +
+  theme_bw() +
+  labs(title = "Alone time preference by Personality Type",
+       x = "Personality Type", y = "Alone time preference") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(personality, aes(x = personality_type, y = online_social_usage)) +
+  geom_boxplot(fill = c("beige", "skyblue", "pink"), alpha = 0.7) +
+  theme_bw() +
+  labs(title = "Online social usage by Personality Type",
+       x = "Personality Type", y = "Online social usage") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(personality, aes(x = personality_type, y = listening_skill)) +
+  geom_boxplot(fill = c("beige", "skyblue", "pink"), alpha = 0.7) +
+  theme_bw() +
+  labs(title = "Listening skill by Personality Type",
+       x = "Personality Type", y = "Listening skills") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+As we can see from the box plots, there are clear distinctions of which personality type sees themselves more with which variables. Variables that seem more "outgoing" typically show higher medians and higher box plots for the extrovers and variables associated with "quite" have higher medians and box plots for the introverts. What is interesting to see here is how the ambivert box plots moves across these four variables. It's truly in the middle and shows that it corresponds to the traits which are a mix of both. 
+
+This warrants for us to find the variables that contribute most to the personality types. In some sence we want to make a variable importance plot, without fitting any models. 
+
+# Variable Importance 
+Recall that all of our predictor variables are numeric and in the summary stats table above we have the means across each variable. We can deploy an ANOVA test to check whether there is any significant difference between the variables. This tells us how much each numeric variable differs between personality groups. In other words the variable that contributes most to the personality type would be the one with highest F-value. 
+
+```{r}
+library(broom)
+library(purrr)
+
+# Exclude personality_type (response)
+numeric_vars <- personality %>% 
+  select(where(is.numeric))
+
+# Compute ANOVA F-statistics for each variable
+anova_results <- map_df(names(numeric_vars), function(var) {
+  model <- aov(personality[[var]] ~ personality$personality_type)
+  tidy(model) %>%
+    filter(term != "Residuals") %>%
+    mutate(variable = var) %>%
+    select(variable, statistic, p.value)
+})
+
+# Plot variable importance
+anova_results %>%
+  arrange(desc(statistic)) %>%
+  ggplot(aes(x = reorder(variable, statistic), y = statistic)) +
+  geom_col(fill = "lightgoldenrod", color = "black") +
+  coord_flip() +
+  labs(title = "Variable Importance (ANOVA F-statistic)",
+       x = "Variable",
+       y = "F-Statistic") +
+  theme_bw()
+```
+
+The ANOVA test tells us that the variable that's going to be most distinguishing will be party liking. Variables that don't have much sway are creativity, stress-handling, and emotional-stability. 
