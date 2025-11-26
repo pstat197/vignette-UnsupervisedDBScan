@@ -1,7 +1,21 @@
 # vignette-UnsupervisedDBScan
-Unsupervised three class classification of Synthetic Personality Traits using DBScan, KMeans, and LogReg in R
-test -nicole
-Testing to make sure I have access to repo - Josephine
+
+Your README file should contain five main pieces of information in the following order:
+
+A one-sentence description at the very top before any (sub)headers:
+
+Vignette on implementing density-based clustering on three class classification of Synthetic Personality Traits using DBScan, KMeans, and LogReg in R, created for PSTAT 197A.
+
+Contributors: Aarti Garaye, Josephine Kaminaga, Jimmy Wu, Nicole Xu
+
+Vignette abstract: a brief description in a few sentences of your vignette topic, example data, and outcomes.
+
+Repository contents: an explanation of the directory structure of the repository
+
+Reference list: 2 or more references to learn more about your topic.
+Martin Ester, Hans-Peter Kriegel, Jörg Sander, and Xiaowei Xu. 1996. A density-based algorithm for discovering clusters in large spatial databases with noise. In Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD'96). AAAI Press, 226–231.
+
+A typical README file would also contain instructions on use and instructions on contributing to the repository.
 
 # Project Brainstorming
 We will be brainstorming the specific prompt & the relevant tasks for our project.

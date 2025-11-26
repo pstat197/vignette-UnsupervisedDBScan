@@ -1,0 +1,70 @@
+---
+title: "Unsupervised Clustering Methods"
+author: "Nicole Xu"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    df_print: paged
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading Necessary Libraries and Data
+```{r, warning=FALSE, message=FALSE}
+library(readr)
+library(readxl)
+library(visdat)
+library(dplyr)
+library(caret)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(tidyr)
+library(dbscan)
+library(factoextra)
+
+personality <- read.csv("../data/raw/personality_synthetic_dataset.csv")
+```
+
+# Preprocessing & Assumptions
+
+```{r}
+str(personality)
+personality_cluster <- personality[-1]
+```
+
+We first visualize a knee plot to determine the most optimal epsilon value for DBScan clustering.
+According to Schubert, E., Sander, J., Ester, M., Kriegel, H. P., & Xu, X. (2017). DBSCAN revisited, revisited: why and how you should (still) use DBSCAN. ACM Transactions on Database Systems (TODS), 42(3), 19.
+
+For two-dimensional data: use default value of minPts=4 (Ester et al., 1996)
+For more than 2 dimensions: minPts=2*dim (Sander et al., 1998)
+Once you know which MinPts to choose, you can determine Epsilon:
+
+Plot the k-distances with k=minPts (Ester et al., 1996)
+Find the 'elbow' in the graph--> The k-distance value is your Epsilon value.
+```{r}
+set.seed(1)
+min_pts = 2*dim(personality_cluster)[2]
+kNNdistplot(personality_cluster, k = min_pts)
+```
+
+# DBScan Clustering
+
+```{r}
+set.seed(1)
+pers_dbscan <- dbscan(personality_cluster, eps = 7, minPts = min_pts)
+pers_dbscan
+```
+```{r}
+pers_combined <- personality_cluster %>% mutate(cluster = pers_dbscan$cluster) %>% filter(cluster != 0)
+
+fviz_cluster(list(clusters = pers_combined[,30], data = pers_combined[,1:29]), geom = "point", ellipse = TRUE, main = "DBScan Clustering w/o noise values")
+```
+
+```{r}
+plot(personality_cluster, col = pers_dbscan$cluster + 1, pch = 20)
+```
+
