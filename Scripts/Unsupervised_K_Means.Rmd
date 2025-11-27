@@ -1,0 +1,11 @@
+---
+title: "Unsupervised_K_Means"
+author: "Jimmy Wu"
+date: "2025-11-27"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
