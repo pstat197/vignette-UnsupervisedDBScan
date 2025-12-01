@@ -10,149 +10,105 @@
 # Tran Khanh Hiep Nguyen Minh Duc                       #
 #########################################################
 
-ckmeans <-
-  function(data, k, mustLink, cantLink, maxIter = 100) {
-    
-    dist <- function(x, y) {
-      tmp <- x - y
-      sum(tmp * tmp)
-    }
-    
-    violate <- function(i, j) {
-      for (u in mlw[[i]]) {
-        if (label[u] != 0 && label[u] != j)
-          return(1);
-      }
-      for (u in clw[[i]]) {
-        if (label[u] == j)
-          return(1);
-      }
-      0
-    }
-    
-    findMustLink <- function(i) {
-      tmp = c()
-      for (j in 1:n) {
-        if (M[i, j] == 1)
-          tmp = c(tmp, j)
-      }
-      tmp
-    }
-    
-    findCantLink <- function(i) {
-      tmp = c()
-      for (j in 1:n) {
-        if (C[i, j] == 1)
-          tmp = c(tmp, j)
-      }
-      tmp
-    }
-    
-    data = as.matrix(data)
-    n <- nrow(data)
-    d <- ncol(data)
-    nm <- nrow(mustLink)
-    nc <- nrow(cantLink)
-    
-    M = matrix(0, nrow = n, ncol = n)
-    for (i in 1:nm) {
-      if (i > nm)
-        break;
-      u = mustLink[i, 1]
-      v = mustLink[i, 2]
-      M[u, v] = 1
-      M[v, u] = 1
-    }
-    for (u in 1:n) {
-      for (i in 1:n) {
-        for (j in 1:n) {
-          if (M[i, u] == 1 && M[u, j] == 1)
-            M[i, j] = 1
-        }
-      }
-    }
-    
-    tp = rep(0, n)
-    ntp = 0
-    for (i in 1:n) {
-      if (tp[i] == 0) {
-        ntp = ntp + 1
-        tp[i] = ntp
-        j = i + 1
-        while (j <= n) {
-          if (tp[j] == 0 && M[i, j] == 1)
-            tp[j] = ntp
-          j = j + 1
-        }
-      }
-    }
-    
-    findMember <- function(v) {
-      tmp = c()
-      for (u in 1:n) {
-        if (tp[u] == v)
-          tmp = c(tmp, u)
-      }
-      tmp
-    }
-    tmpPi = lapply(1:ntp, findMember)
-    
-    C = matrix(0, nrow = n, ncol = n)
-    for (i in 1:nc) {
-      if (i > nc)
-        break;
-      u = cantLink[i, 1]
-      v = cantLink[i, 2]
-      x = tp[u]
-      y = tp[v]
-      if (x != y) {
-        for (p in tmpPi[[x]]) {
-          for (q in tmpPi[[y]]) {
-            C[p, q] = 1
-            C[q, p] = 1
-          }
-        }
-      }
-    }
-    
-    mlw <- lapply(1:n, findMustLink)
-    clw <- lapply(1:n, findCantLink)
-    
-    #set.seed(9191)
-    tmp <- sample(1:n, k)
-    C <- matrix(nrow = k, ncol = d)
-    for (i in 1:k) {
-      C[i,] = data[tmp[i],]
-    }
-    for (iter in 1:maxIter) {
-      label <- rep(0, n)
-      for (i in 1:n) {
-        dd <- rep(1e15, k)
-        best <- -1
-        for (j in 1:k) {
-          if (violate(i, j) == 0) {
-            dd[j] <- dist(data[i,], C[j,])
-            if (best == -1 || dd[j] < dd[best]) {
-              best = j
-            }
-          }
-        }
-        if (best == -1)
-          return(0)    
-        label[i] <- best
-      }
-      if (iter == maxIter)
-        return(label)
-      C2 <- matrix(0, nrow = k, ncol = d)
-      dem <- rep(0, k)
-      for (i in 1:n) {
-        j = label[i]
-        C2[j,] = C2[j,] + data[i,]
-        dem[j] = dem[j] + 1
-      }
-      for (i in 1:k) {
-        if (dem[i] > 0)
-          C[i,] = 1.0 * C2[i,] / dem[i]
-      }
+ckmeans <- function(data, k, mustLink, cantLink, maxIter = 100, tol = 1e-6) {
+  
+  data <- as.matrix(data)
+  n <- nrow(data)
+  d <- ncol(data)
+  
+  # ---- 1. Build simple constraint lists (no transitive expansion) ----
+  ML <- vector("list", n)
+  CL <- vector("list", n)
+  
+  if (!is.null(mustLink) && nrow(mustLink) > 0) {
+    for (i in 1:nrow(mustLink)) {
+      a <- mustLink[i,1]; b <- mustLink[i,2]
+      ML[[a]] <- c(ML[[a]], b)
+      ML[[b]] <- c(ML[[b]], a)
     }
   }
+  if (!is.null(cantLink) && nrow(cantLink) > 0) {
+    for (i in 1:nrow(cantLink)) {
+      a <- cantLink[i,1]; b <- cantLink[i,2]
+      CL[[a]] <- c(CL[[a]], b)
+      CL[[b]] <- c(CL[[b]], a)
+    }
+  }
+  
+  # ---- 2. Initialize centers by random sample ----
+  set.seed(11302025)
+  centers <- data[sample(1:n, k), , drop = FALSE]
+  labels <- rep(0, n)
+  
+  # ---- helper: squared Euclidean distance ----
+  dist2 <- function(x, y) sum((x - y)^2)
+  
+  # ---- 3. Main loop ----
+  for (iter in 1:maxIter) {
+    
+    prev_labels <- labels
+    
+    # ---- Assign each point to nearest allowable cluster ----
+    for (i in 1:n) {
+      best_k <- -1
+      best_d <- Inf
+      
+      for (cidx in 1:k) {
+        
+        # must-link: if any ML friend is assigned to a *different* cluster, reject
+        violated <- FALSE
+        for (m in ML[[i]]) {
+          if (prev_labels[m] != 0 && prev_labels[m] != cidx) {
+            violated <- TRUE
+            break
+          }
+        }
+        if (violated) next
+        
+        # cannot-link: if any CL friend *already* in cluster, reject
+        violated <- FALSE
+        for (c in CL[[i]]) {
+          if (prev_labels[c] == cidx) {
+            violated <- TRUE
+            break
+          }
+        }
+        if (violated) next
+        
+        # distance check
+        dval <- dist2(data[i,], centers[cidx,])
+        if (dval < best_d) {
+          best_d <- dval
+          best_k <- cidx
+        }
+      }
+      
+      # If no feasible cluster (rare), assign to *closest cluster* ignoring constraints
+      if (best_k == -1) {
+        best_k <- which.min(colSums((t(centers) - data[i,])^2))
+      }
+      
+      labels[i] <- best_k
+    }
+    
+    # ---- 4. Update centers ----
+    new_centers <- matrix(0, nrow = k, ncol = d)
+    counts <- table(factor(labels, levels = 1:k))
+    
+    for (j in 1:k) {
+      if (counts[j] > 0) {
+        new_centers[j,] <- colMeans(data[labels == j, , drop = FALSE])
+      } else {
+        # reinitialize empty cluster with random point
+        new_centers[j,] <- data[sample(1:n, 1),]
+      }
+    }
+    
+    # ---- convergence check ----
+    shift <- sum((centers - new_centers)^2)
+    centers <- new_centers
+    if (shift < tol) break
+  }
+  
+  return(labels)
+}
