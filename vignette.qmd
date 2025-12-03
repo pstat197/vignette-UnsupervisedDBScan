@@ -1,0 +1,10 @@
+---
+title: "Vignette"
+format: html
+output: 
+    html_document:
+        css: bootstrap.css
+author: Aarti Garaye, Josephine Kaminaga, Jimmy Wu, & Nicole Xu
+---
+
+
