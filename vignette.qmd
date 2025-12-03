@@ -1,10 +1,123 @@
 ---
-title: "Vignette"
-format: html
-output: 
-    html_document:
-        css: bootstrap.css
-author: Aarti Garaye, Josephine Kaminaga, Jimmy Wu, & Nicole Xu
+title: "Vignette: Guide to Supervised and Unsupervised Clustering"
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    number-sections: true
+css: bootstrap.css
+authors: Aarti Garaye, Josephine Kaminaga, Jimmy Wu, and Nicole Xu
+date: "`r Sys.Date()`"
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
+# Abstract
+
+Clustering is a fundamental tool in data analysis. It helps uncover latent structure, group similar observations, and identify meaningful patterns in unlabeled data. Because clustering is widely used across domains—from marketing and biology to social sciences and engineering—it is important to understand how different algorithms behave under varying data conditions. This vignette provides a practical, example-driven introduction to four different clustering methods. We deploy DBScan and Kmeans clustering for supervised clustering. For unsupervised we deploy Partitioning Around Medoids (PAM) and Constrained KMeans.
+
+To illustrate these concepts, we use a synthetically generated [personality dataset from Kaggle](https://www.kaggle.com/datasets/miadul/introvert-extrovert-and-ambivert-classification/data). The raw csv file is stored in the data folder of this repository. The dataset is designed to simulate human personality types — Introvert, Extrovert, and Ambivert — based on various behavioral and psychological traits. It containes 20,000 entries and 30 columns, including 29 numerical features representing personality indicators and 1 categorical (3 class) response variable (`personality_type`). 
+
+The goal of this vignette is to provide a clear, accessible guide for performing and interpreting clustering analyses. By walking through multiple algorithms on the same dataset, readers can compare outcomes, understand strengths and limitations, and gain intuition about when and why certain clustering methods are appropriate. This resource is intended to serve as a practical reference for students and practitioners who encounter clustering tasks in applied data projects.
+
+# Dataset Structure
+
+The dataset was obtained from Kaggle. It was synthetically generated using Python and NumPy. Feature distributions were modeled with class-specific means and added noise using a normal distribution to simulate natural variation.
+
+**All feature values are numerical and scaled from 0 (low) to 10 (high).** 
+
+Table: Personality Dataset Feature Descriptions
+
+::: {.panel-body style="max-height:250px; overflow-y:auto;"}
+
+| Column Name               | Description                                           |
+|---------------------------|-------------------------------------------------------|
+| `personality_type`        | Target variable: Introvert, Extrovert, or Ambivert    |
+| `social_energy`           | Tendency to gain energy from social interaction (0–10) |
+| `alone_time_preference`   | Comfort with solitude                                 |
+| `talkativeness`           | Propensity to engage in conversation                  |
+| `deep_reflection`         | Frequency of deep or introspective thinking           |
+| `group_comfort`           | Ease in group environments                            |
+| `party_liking`            | Enjoyment of parties and social events                |
+| `listening_skills`        | Active listening ability                              |
+| `empathy`                 | Ability to understand others’ emotions                |
+| `creativity`              | Tendency toward creative thinking                     |
+| `organization`            | Preference for order, structure, and plans            |
+| `leadership`             | Comfort in leading others                              |
+| `risk_taking`             | Willingness to take risks                             |
+| `public_speaking_comfort` | Comfort level in public speaking situations           |
+| `curiosity`               | Interest in learning or exploring                     |
+| `routine_preference`      | Preference for routine vs. spontaneity                |
+| `excitement_seeking`      | Desire for new and stimulating experiences            |
+| `friendliness`            | General social warmth and approachability             |
+| `emotional_stability`     | Ability to remain calm and balanced under stress      |
+| `planning`                | Tendency to plan ahead                                |
+| `spontaneity`             | Acting on impulse or without planning                 |
+| `adventurousness`         | Willingness to try new and risky activities           |
+| `reading_habit`           | Frequency of reading books or articles                |
+| `sports_interest`         | Level of interest in sports or physical activities    |
+| `online_social_usage`     | Time spent on social media and online interaction     |
+| `travel_desire`           | Interest in travel and exploring new places           |
+| `gadget_usage`            | Frequency of gadget or tech device use                |
+| `work_style_collaborative`| Preference for teamwork vs. solo work                 |
+| `decision_speed`          | How quickly decisions are made                        |
+| `stress_handling`         | Ability to manage stress effectively                  |
+
+:::
+
+## Disclaimer
+
+**This is a synthetic dataset created for research, learning, and experimental purposes only. It does not represent real individuals or real-world psychometrics.**
+
+## Exploratory Analysis
+
+### Loading Libraries and Exploring the Data Struction
+
+The code above loads the necessary libraries and the data from the data folder
+```{r, warning=FALSE, message=FALSE}
+library(readr)
+library(readxl)
+library(visdat)
+library(dplyr)
+library(caret)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(tidyr)
+
+personality <- read.csv("data/raw/personality_synthetic_dataset.csv")
+```
+
+The table shows each variable class.
+```{r}
+personality %>%
+  summarise(across(everything(), ~ class(.x)[1])) %>%
+  pivot_longer(everything(), names_to = "column", values_to = "class") %>%
+  kable(col.names = c("Column Name", "Class"), caption = "Variable Type in the Dataset") %>%
+  scroll_box(height = "200px")
+```
+There are `r nrow(personality)` number of rows and `r ncol(personality)` columns.
+
+### Missing data
+This is synthetically simulated data so we don't expect any discrepancies. We have already check about the missing values and duplicates in the data cleaning process (in the Scripts folder). We will add a vis miss plot here to double check. Furthermore, it is important to note that $0$ values are not missing, they are just values with low scoring for that particular variable. 
+
+```{r, fig.align='center', fig.cap="As the plot shows above, there are no missing values."}
+vis_miss(personality)
+```
+
+### Class Balance
+There are three classes in our dataset, introvert, extrovert, and ambivert. Although clustering does not use class labels during model fitting, examining class balance is important when labels are available because imbalance can influence cluster structure, distort evaluation metrics, and make interpretation of the resulting clusters less reliable. The graphs below show the class balance
+
+```{r, fig.cap="The figures show that classes are approximately distributed equally. This is good for later analysis."}
+personality_counts <- personality %>%
+  count(personality_type)
+
+pie(
+  personality_counts$n,
+  labels = paste0(personality_counts$personality_type, 
+                  " (", round(personality_counts$n / sum(personality_counts$n) * 100, 1), "%)"),
+  main = "Personality Type Distribution"
+)
+```
