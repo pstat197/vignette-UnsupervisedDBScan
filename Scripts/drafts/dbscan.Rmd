@@ -60,7 +60,7 @@ We remove the noise points (data the algorithm decided did not fall into any clu
 ```{r}
 pers_combined <- personality %>% mutate(cluster = pers_dbscan$cluster) %>% filter(cluster != 0)
 
-fviz_cluster(list(clusters = pers_combined[,31], data = pers_combined[,2:30]), geom = "point", ellipse = TRUE, main = "DBScan Clustering w/o noise values")
+fviz_cluster(list(clusters = pers_combined[,31], data = pers_combined[,2:30]), geom = "point", ellipse = TRUE, main = "DBScan Clustering w/o noise values") + ggplot2::aes(shape = as.factor(pers_combined[,1]))
 ```
 
 ```{r}
