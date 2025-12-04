@@ -353,12 +353,27 @@ pers_dbscan <- dbscan(personality_cluster, eps = 7, minPts = min_pts)
 pers_dbscan
 ```
 
-We remove the noise points (data the algorithm decided did not fall into any cluster) and visualize our clusters using the `factoextra` package. This package automatically performs PCA to reduce the dimensionality, and plots the first two principal components.
+We see that it has returned clusters 0, 1, 2, 3. In DBSCAN, a value of 0 means that the algorithm decided that point did not fall into any cluster, aka a noise point. Of the 20000 data points, 12081 were classified as noise points, while the rest fell into one of the three clusters. Overall, the size of clusters appear fairly balanced, however the success rate of assigning every point to a cluster is quite low.
+
+We remove the noise points and visualize our clusters using the `factoextra` package. This package automatically performs PCA to reduce the dimensionality, and plots the first two principal components.
 ```{r}
 pers_combined <- personality %>% mutate(cluster = pers_dbscan$cluster) %>% filter(cluster != 0)
 
 fviz_cluster(list(clusters = pers_combined[,31], data = pers_combined[,2:30]), geom = "point", ellipse = TRUE, main = "DBScan Clustering w/o noise values")
 ```
+The visualization shows 3 strong clusters with some overlap, which follows general intuition about personality types. We see also that PC1 captures 47.9% of the variation between data points.
+
+```{r}
+pers_summary_transpose <- pers_combined %>% group_by(cluster) %>% summarise(across(where(is.numeric), mean, .names = "mean_{.col}"), .groups = "drop") %>% t()
+colnames(pers_summary_transpose) <- pers_summary_transpose[1,]
+pers_summary_transpose <- pers_summary_transpose[-1,]
+pers_table <- pers_summary_transpose %>% kbl() %>% kable_material("striped")
+
+htmltools::div(
+style = "height:250px; overflow-y: scroll; border:1px solid #ccc; padding:5px;",
+htmltools::HTML(pers_table, format = "html", caption = "The mean of each variable across the three clusters"))
+```
+Taking a look at the average traits across the three clusters, we start to notice some patterns that match our prior assumptions about the true labels present in the data. Namely, cluster 1 has high values for traits such as social energy, talkativeness, party liking, leadership, spontaneity etc. Meanwhile cluster 3 has high values for traits such as listening skill, routine preference,organization, empathy, deep reflection etc. We see also that cluster 2 usually has values in the middle for most of the traits. These patterns follow our intuition for what traits each personality might have, and suggests that DBSCAN successfully identified the introvert, extrovert, and ambivert categories.
 
 
 
@@ -382,7 +397,7 @@ dat_num <- personality %>%
 dat_scaled <- scale(dat_num)
 ```
 
-```{r choose-k-elbow}
+```{r choose-k-elbow, warning=FALSE}
 # Choose the value of k using elbow method
 set.seed(20251126)
 max_k <- 10
@@ -402,7 +417,7 @@ ggplot(wss_df, aes(x = k, y = tot_withinss)) +
 ```
 The elbow plot shows the total within-cluster sum of squares decreasing sharply from k = 1 to k = 2, with diminishing improvements for k $\geq$ 3. This indicates that going beyond two clusters adds little additional explanatory power.
 
-```{r choose-k-silhouette}
+```{r choose-k-silhouette, warning=FALSE}
 # Choose the value of k using average silhouette width method
 set.seed(20251126)
 
