@@ -73,10 +73,10 @@ Table: Personality Dataset Feature Descriptions
 
 # Exploratory Analysis
 
-### Loading Libraries and Exploring the Data Struction
+## Loading Libraries and Exploring the Data Struction
 
 The code above loads the necessary libraries and the data from the data folder
-```{r, warning=FALSE, message=FALSE}
+```{r loading_libs, warning=FALSE, message=FALSE}
 library(readr)
 library(readxl)
 library(visdat)
@@ -88,6 +88,8 @@ library(kableExtra)
 library(tidyr)
 library(tidyverse)
 library(cluster)
+library(broom)
+library(purrr)
 
 personality <- read.csv("data/raw/personality_synthetic_dataset.csv")
 source("Scripts/ckmeans.R")
@@ -103,17 +105,17 @@ personality %>%
 ```
 There are `r nrow(personality)` number of rows and `r ncol(personality)` columns.
 
-### Missing data
+## Missing data
 This is synthetically simulated data so we don't expect any discrepancies. We have already check about the missing values and duplicates in the data cleaning process (in the Scripts folder). We will add a vis miss plot here to double check. Furthermore, it is important to note that $0$ values are not missing, they are just values with low scoring for that particular variable. 
 
-```{r, fig.align='center', fig.cap="As the plot shows above, there are no missing values."}
+```{r missing_data, fig.align='center', fig.cap="As the plot shows above, there are no missing values."}
 vis_miss(personality)
 ```
 
-### Class Balance
+## Class Balance
 There are three classes in our dataset, introvert, extrovert, and ambivert. Although clustering does not use class labels during model fitting, examining class balance is important when labels are available because imbalance can influence cluster structure, distort evaluation metrics, and make interpretation of the resulting clusters less reliable. The graphs below show the class balance
 
-```{r, fig.cap="The figures show that classes are approximately distributed equally. This is good for later analysis."}
+```{r class_balance, fig.cap="The figures show that classes are approximately distributed equally. This is good for later analysis."}
 personality_counts <- personality %>%
   count(personality_type)
 
@@ -125,15 +127,12 @@ pie(
 )
 ```
 
-### Feature Analysis and Variable Importance
+## Feature Analysis and Variable Importance
 We are using four clustering workflows: k-means, PAM, COP-k-means, and DBSCAN. All of these are sensitive to irrelevant or redundant variables. Distance-based methods such as k-means, PAM, and COP-k-means rely on Euclidean distances, so noisy or uninformative features can distort the distance structure and lead to poorly separated or unstable clusters. DBSCAN, while density-based, is also affected by high-dimensional noise because irrelevant variables make it harder to identify dense regions and choose meaningful $\epsilon$ neighborhoods. By identifying which variables contribute most to cluster separation, we reduce dimensionality, improve cluster stability, and ensure that the resulting supervised and unsupervised clusters reflect meaningful structure rather than artifacts of the feature space. 
 
 Recall that all of our predictor variables are numeric and in the summary stats table above we have the means across each variable. We can deploy an ANOVA test to check whether there is any significant difference between the variables. This tells us how much each numeric variable differs between personality groups. In other words the variable that contributes most to the personality type would be the one with highest F-value. 
 
-```{r, message=FALSE, warning=FALSE}
-library(broom)
-library(purrr)
-
+```{r variable_importance, message=FALSE, warning=FALSE}
 # Exclude personality_type (response)
 numeric_vars <- personality %>% 
   select(where(is.numeric))
@@ -195,12 +194,15 @@ names(pam_clustered)
 The most important information from the PAM model can be found by accessing the `medoids`, `clusinfo`, and `silinfo` attributes. The `medoids` attribute contains the values of each medoid along each variable in the data, as seen below.
 
 ```{r medoids}
-pam_clustered$medoids
+htmltools::div(
+style = "height:270px; overflow-y: scroll; border:1px solid #ccc; padding:5px;",
+htmltools::HTML(knitr::kable(pam_clustered$medoids, format = "html", caption = "The mean of each variable across the three clusters"))
+)
 ```
 
 The `clusinfo` attribute contains information about the size and dissimilarities of each identified cluster, while the `silinfo` attribute describes the silhouette of the PAM model (a measurement of cluster consistency) and contains multiple smaller attributes - `widths` has information about the designated cluster and silhouette width of each individual data point, `clus.avg.widths` has the average silhouette width of each identified cluster, and `avg.width` is the average width across all clusters. Since `widths` is quite the long attribute, we will skip that and show `clus.avg.widths` instead.
 
-```{r}
+```{r pam_info}
 pam_clustered$clusinfo
 
 names(pam_clustered$silinfo)
@@ -210,7 +212,7 @@ pam_clustered$silinfo$clus.avg.widths
 
 We can also compare the cluster assignments of PAM with the true group labels of the data. The cluster assignments of PAM are found in the `clustering` attribute.
 
-```{r}
+```{r pam_table}
 table(pam_clustered$clustering, personality$personality_type)
 ```
 
@@ -229,7 +231,7 @@ This uses the ground truth only to form constraints, not as a variable in the cl
 
 **COP K-means can be implemented with `conclust`. (Note: this package was removed from CRAN, and we are using a downloaded & archived version of the `ckmeans()` function that is used to perform COP K-means clustering).**
 
-```{r}
+```{r personality_num}
 set.seed(11302025)
 # keep only numeric features
 personality_num <- as.matrix(personality[ , -1])
@@ -237,7 +239,7 @@ personality_num <- as.matrix(personality[ , -1])
 
 We sample a handful of pairs to create small but meaningful constraint sets. These constraints are only for demonstration — in applied work, constraints come from domain experts. 
 
-```{r}
+```{r fitting_cpkmeans}
 ext <- which(personality$personality_type == "Extrovert")
 int <- which(personality$personality_type == "Introvert")
 amb <- which(personality$personality_type == "Ambivert")
@@ -249,7 +251,7 @@ must_link_pairs <- rbind(
 )
 #must_link_pairs
 
-ant_link_pairs <- rbind(
+cant_link_pairs <- rbind(
   c(sample(ext, 1), sample(int, 1)),
   c(sample(int, 1), sample(amb, 1)),
   c(sample(ext, 1), sample(amb, 1))
@@ -273,8 +275,8 @@ Extroverts is 99.7% correctly clustered
 Introverts is 100% correctly clustered
 Ambiverts is 99% correctly clustered
 
-We can further visualize this with these plots. Here we are using PC1 and PC2 which are the principle components explaining most of the variability.
-```{r}
+We can further visualize this with these plots. Here we are using PC1 and PC2 which are the principle components explaining most of the variability. Note, We are only using PCA for visualization, because this dataset is operating in 30+ dimensional space where plots are impossible to interpret directly. In fact, we did the same with PAM, when we call `pam()` it automatically produces a PCA projection internally.
+```{r copkmeans_plots}
 # PCA for plotting
 pca <- prcomp(personality_num, scale. = TRUE)
 pca_df <- as.data.frame(pca$x[,1:2]) |>
@@ -290,4 +292,48 @@ ggplot(pca_df, aes(PC1, PC2, color = cluster)) +
   theme_bw()
 ```
 
-For centers of each of the cluster means we can find each means
+For centers of each of the cluster means we can find each means and see how these are different across clusters. In both PAM and COP-KMeans, the cluster center (a medoid for PAM and a mean vector for K-Means) represents the “typical” or most representative profile of individuals in that cluster. Examining these centers allows us to interpret what distinguishes one cluster from another. By comparing centers across clusters, we can characterize the personality patterns each cluster captures and evaluate whether they align with known categories such as introverts, ambiverts, and extroverts. 
+
+```{r copkmeans_table}
+cluster_centers <- aggregate(
+personality_num,
+by = list(cluster = ck_clusters),
+FUN = mean
+)
+
+htmltools::div(
+style = "height:250px; overflow-y: scroll; border:1px solid #ccc; padding:5px;",
+htmltools::HTML(knitr::kable(cluster_centers, format = "html", caption = "The mean of each variable across the three clusters"))
+)
+```
+
+To see how each of the clusters are different than each other we use Silhoutte plot just like we did for PAM. The silhouette plot provides a visual summary of how well each observation fits within its assigned cluster relative to the other clusters. For each data point, the silhouette width ranges from –1 to 1 where values close to 1 indicates the observations are well matched to the clusters they are assigned to. Values close to 0 indicates that the observation is on the borders between the clusters. Negative values means that the point may have been miscalculated, meaning it is closer to another cluster than its assigned one.
+```{r copkmeans_sil}
+dist_mat <- dist(personality_num)
+
+sil <- silhouette(ck_clusters, dist_mat)
+
+plot(sil, main = "Silhouette Plot for COP K-Means")
+```
+
+In the silhouette plot for COP K-Means, each bar represents an individual observation, grouped by cluster and sorted by silhouette width. The height and consistency of the bars show how tight and well-separated each cluster is. As we can see this is very similar to the PAM. Below is the summary table for the COP KMeans.
+```{r summ-sil}
+summary(sil)
+```
+
+Finally, we can cross check this with the truth. We can only do this because we are practicing Supervised Learning.
+```{r truth-cpkmeans}
+table(ck_clusters, personality$personality_type)
+```
+
+As we can see from the table above, the COP KMeans clustering is very close to the ground truth. Ambivert seems like the hardest group to cluster correctly, which makes sense due to its position as a median group between extrovert and introvert. 
+
+# Unsupervised Learning
+
+## DBScan
+
+## KMeans
+
+# Conclusion
+
+# References
