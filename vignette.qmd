@@ -90,6 +90,8 @@ library(tidyverse)
 library(cluster)
 library(broom)
 library(purrr)
+library(dbscan)
+library(factoextra)
 
 personality <- read.csv("data/raw/personality_synthetic_dataset.csv")
 source("Scripts/ckmeans.R")
@@ -331,6 +333,42 @@ As we can see from the table above, the COP KMeans clustering is very close to t
 # Unsupervised Learning
 
 ## DBScan
+
+In this section we will walk through an implementation of DBSCAN, a density based clustering algorithm that groups data points based on how close they are in the feature space. This algorithm differs from other clustering algorithms such as k-means and hierarchical in that it works well with arbitrarily shaped clusters, as well as dealing with outliers and noise. This implementation will be using the `dbscan` R package.
+
+In order to cluster the data, we remove the predictor column since we are using an unsupervised learning method.
+```{r}
+personality_cluster <- personality %>% select(-personality_type)
+```
+
+The two parameters needed for dbscan are epsilon and minimum points. Epsilon is the radius of a cluster around a data point, where if the distance between two points is less than or equal to epsilon, they are considered neighbors. Minimum points is defined as the number of points needed within the epsilon radius to be considered a dense region.
+
+DBSCAN works by categorizing data points into core points (sufficient number of neighbors and within epsilon radius), border points (insufficient number of neighbors but within epsilon radius), and noise points (not belonging to any cluster). It does not require a k number of clusters to be specified in advance and instead iteratively expands clusters from core points by finding density based neighbors.
+
+We first visualize a knee plot to determine the most optimal epsilon value for DBSCAN clustering. According to _Schubert, E., Sander, J., Ester, M., Kriegel, H. P., & Xu, X. (2017). DBSCAN revisited, revisited: why and how you should (still) use DBSCAN. ACM Transactions on Database Systems (TODS), 42(3), 19_, for two-dimensional data use a default value of minPts=4. For more than 2 dimensions, define minPts=2*dim. Once you know which minPts to choose, you can determine epsilon by plotting the k-distances with k=minPts. Find the 'knee' in the graph and that corresponding k-distance value is your epsilon value.
+
+```{r}
+#setting the value of minimum points and choosing k from the knee plot
+set.seed(1)
+min_pts = 2*dim(personality_cluster)[2]
+kNNdistplot(personality_cluster, k = min_pts)
+```
+
+In the above plot, we see that the 'knee' occurs around 7 so we set our epsilon value to 7 and run `dbscan`.
+```{r}
+set.seed(1)
+pers_dbscan <- dbscan(personality_cluster, eps = 7, minPts = min_pts)
+pers_dbscan
+```
+
+We remove the noise points (data the algorithm decided did not fall into any cluster) and visualize our clusters using the `factoextra` package. This package automatically performs PCA to reduce the dimensionality, and plots the first two principal components.
+```{r}
+pers_combined <- personality %>% mutate(cluster = pers_dbscan$cluster) %>% filter(cluster != 0)
+
+fviz_cluster(list(clusters = pers_combined[,31], data = pers_combined[,2:30]), geom = "point", ellipse = TRUE, main = "DBScan Clustering w/o noise values")
+```
+
+
 
 ## KMeans
 

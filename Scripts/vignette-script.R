@@ -142,8 +142,7 @@ pers_combined <- personality %>%
 
 fviz_cluster(list(clusters = pers_combined[,31], data = pers_combined[,2:30]), 
              geom = "point", ellipse = TRUE, 
-             main = "DBScan Clustering w/o noise values") + 
-  ggplot2::aes(shape = as.factor(pers_combined[,1]))
+             main = "DBScan Clustering w/o noise values")
 
 pers_combined %>% group_by(cluster) %>% summarise(max(personality_type))
 
