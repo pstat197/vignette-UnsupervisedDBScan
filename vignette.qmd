@@ -189,7 +189,8 @@ pam_clustered <- readRDS("vignette_files/model-results/PAM_model.rds")
 The results of the PAM model can be visualized by calling `plot()` upon the PAM model. Below, we can see that when `plot()` is called, we obtain a PCA-reminiscent plot of the personality data along two components that together explain 43.92% of the variability in the data. PAM has identified the three distinct clusters that stand out in this representation. We also obtain a numeric description of the clusters' sizes and numeric widths in the component space.
 
 ```{r plot-pam-results}
-plot(pam_clustered, main = "PAM Cluster Plot for Personality Data")
+plot(pam_clustered, main = "PAM Cluster Plot for Personality Data",
+     which = 1)
 ```
 
 We can obtain further results by inspecting the fitted elements of the PAM model directly. As seen below, the PAM model returns information about the medoids, their locations, the clusters and their sizes, and some other miscellaneous attributes of the data.

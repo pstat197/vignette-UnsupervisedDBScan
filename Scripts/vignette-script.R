@@ -30,7 +30,8 @@ pam_clustered <- pam(personality_PAM, 3, diss = FALSE,
                      metric = "euclidean")
 
 # Plotting the PAM results
-plot(pam_clustered, main = "PAM Cluster Plot for Personality Data")
+plot(pam_clustered, main = "PAM Cluster Plot for Personality Data",
+     which = 1)
 
 # Inspecting the attributes of the PAM model
 pam_clustered$medoids # Medoids
