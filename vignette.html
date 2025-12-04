@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Aarti Garaye, Josephine Kaminaga, Jimmy Wu, &amp; Nicole Xu">
+<meta name="dcterms.date" content="2025-12-03">
 
-<title>Vignette</title>
+<title>Vignette: Guide to Supervised and Unsupervised Clustering</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -36,8 +71,40 @@ ul.task-list li input[type="checkbox"] {
 <script src="vignette_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="vignette_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="vignette_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="vignette_files/libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="vignette_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="bootstrap.css">
 </head>
 
 <body class="fullcontent quarto-light">
@@ -48,7 +115,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Vignette</h1>
+<div class="quarto-title-block"><div><h1 class="title">Vignette: Guide to Supervised and Unsupervised Clustering</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
 </div>
 
 
@@ -58,10 +125,16 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Aarti Garaye, Josephine Kaminaga, Jimmy Wu, &amp; Nicole Xu </p>
+             <p>Aarti Garaye, Josephine Kaminaga, Jimmy Wu, and Nicole Xu </p>
           </div>
   </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 3, 2025</p>
+    </div>
+  </div>
   
     
   </div>
@@ -71,7 +144,970 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="abstract" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Abstract</h1>
+<p>Clustering is a fundamental tool in data analysis. It helps uncover latent structure, group similar observations, and identify meaningful patterns in unlabeled data. Because clustering is widely used across domains—from marketing and biology to social sciences and engineering—it is important to understand how different algorithms behave under varying data conditions. This vignette provides a practical, example-driven introduction to four different clustering methods. We deploy DBScan and Kmeans clustering for supervised clustering. For unsupervised we deploy Partitioning Around Medoids (PAM) and Constrained KMeans.</p>
+<p>To illustrate these concepts, we use a synthetically generated <a href="https://www.kaggle.com/datasets/miadul/introvert-extrovert-and-ambivert-classification/data">personality dataset from Kaggle</a>. The raw csv file is stored in the data folder of this repository. The dataset is designed to simulate human personality types — Introvert, Extrovert, and Ambivert — based on various behavioral and psychological traits. It containes 20,000 entries and 30 columns, including 29 numerical features representing personality indicators and 1 categorical (3 class) response variable (<code>personality_type</code>).</p>
+<p>The goal of this vignette is to provide a clear, accessible guide for performing and interpreting clustering analyses. By walking through multiple algorithms on the same dataset, readers can compare outcomes, understand strengths and limitations, and gain intuition about when and why certain clustering methods are appropriate. This resource is intended to serve as a practical reference for students and practitioners who encounter clustering tasks in applied data projects.</p>
+</section>
+<section id="dataset-structure" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Dataset Structure</h1>
+<p>The dataset was obtained from Kaggle. It was synthetically generated using Python and NumPy. Feature distributions were modeled with class-specific means and added noise using a normal distribution to simulate natural variation.</p>
+<p><strong>All feature values are numerical and scaled from 0 (low) to 10 (high).</strong></p>
+<p>Table: Personality Dataset Feature Descriptions</p>
+<div class="panel-body" style="max-height:250px; overflow-y:auto;">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 67%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>personality_type</code></td>
+<td>Target variable: Introvert, Extrovert, or Ambivert</td>
+</tr>
+<tr class="even">
+<td><code>social_energy</code></td>
+<td>Tendency to gain energy from social interaction (0–10)</td>
+</tr>
+<tr class="odd">
+<td><code>alone_time_preference</code></td>
+<td>Comfort with solitude</td>
+</tr>
+<tr class="even">
+<td><code>talkativeness</code></td>
+<td>Propensity to engage in conversation</td>
+</tr>
+<tr class="odd">
+<td><code>deep_reflection</code></td>
+<td>Frequency of deep or introspective thinking</td>
+</tr>
+<tr class="even">
+<td><code>group_comfort</code></td>
+<td>Ease in group environments</td>
+</tr>
+<tr class="odd">
+<td><code>party_liking</code></td>
+<td>Enjoyment of parties and social events</td>
+</tr>
+<tr class="even">
+<td><code>listening_skills</code></td>
+<td>Active listening ability</td>
+</tr>
+<tr class="odd">
+<td><code>empathy</code></td>
+<td>Ability to understand others’ emotions</td>
+</tr>
+<tr class="even">
+<td><code>creativity</code></td>
+<td>Tendency toward creative thinking</td>
+</tr>
+<tr class="odd">
+<td><code>organization</code></td>
+<td>Preference for order, structure, and plans</td>
+</tr>
+<tr class="even">
+<td><code>leadership</code></td>
+<td>Comfort in leading others</td>
+</tr>
+<tr class="odd">
+<td><code>risk_taking</code></td>
+<td>Willingness to take risks</td>
+</tr>
+<tr class="even">
+<td><code>public_speaking_comfort</code></td>
+<td>Comfort level in public speaking situations</td>
+</tr>
+<tr class="odd">
+<td><code>curiosity</code></td>
+<td>Interest in learning or exploring</td>
+</tr>
+<tr class="even">
+<td><code>routine_preference</code></td>
+<td>Preference for routine vs.&nbsp;spontaneity</td>
+</tr>
+<tr class="odd">
+<td><code>excitement_seeking</code></td>
+<td>Desire for new and stimulating experiences</td>
+</tr>
+<tr class="even">
+<td><code>friendliness</code></td>
+<td>General social warmth and approachability</td>
+</tr>
+<tr class="odd">
+<td><code>emotional_stability</code></td>
+<td>Ability to remain calm and balanced under stress</td>
+</tr>
+<tr class="even">
+<td><code>planning</code></td>
+<td>Tendency to plan ahead</td>
+</tr>
+<tr class="odd">
+<td><code>spontaneity</code></td>
+<td>Acting on impulse or without planning</td>
+</tr>
+<tr class="even">
+<td><code>adventurousness</code></td>
+<td>Willingness to try new and risky activities</td>
+</tr>
+<tr class="odd">
+<td><code>reading_habit</code></td>
+<td>Frequency of reading books or articles</td>
+</tr>
+<tr class="even">
+<td><code>sports_interest</code></td>
+<td>Level of interest in sports or physical activities</td>
+</tr>
+<tr class="odd">
+<td><code>online_social_usage</code></td>
+<td>Time spent on social media and online interaction</td>
+</tr>
+<tr class="even">
+<td><code>travel_desire</code></td>
+<td>Interest in travel and exploring new places</td>
+</tr>
+<tr class="odd">
+<td><code>gadget_usage</code></td>
+<td>Frequency of gadget or tech device use</td>
+</tr>
+<tr class="even">
+<td><code>work_style_collaborative</code></td>
+<td>Preference for teamwork vs.&nbsp;solo work</td>
+</tr>
+<tr class="odd">
+<td><code>decision_speed</code></td>
+<td>How quickly decisions are made</td>
+</tr>
+<tr class="even">
+<td><code>stress_handling</code></td>
+<td>Ability to manage stress effectively</td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="disclaimer" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="disclaimer"><span class="header-section-number">2.1</span> Disclaimer</h2>
+<p><strong>This is a synthetic dataset created for research, learning, and experimental purposes only. It does not represent real individuals or real-world psychometrics.</strong></p>
+</section>
+</section>
+<section id="exploratory-analysis" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Exploratory Analysis</h1>
+<section id="loading-libraries-and-exploring-the-data-struction" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="loading-libraries-and-exploring-the-data-struction"><span class="header-section-number">3.1</span> Loading Libraries and Exploring the Data Struction</h2>
+<p>The code above loads the necessary libraries and the data from the data folder</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(visdat)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>personality <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/raw/personality_synthetic_dataset.csv"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"Scripts/ckmeans.R"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The table shows each variable class.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>personality <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">class</span>(.x)[<span class="dv">1</span>])) <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"class"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Column Name"</span>, <span class="st">"Class"</span>), <span class="at">caption =</span> <span class="st">"Variable Type in the Dataset"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">height =</span> <span class="st">"200px"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; ">
+<table class="caption-top table table-sm table-striped small">
+<caption>Variable Type in the Dataset</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">Column Name</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">personality_type</td>
+<td style="text-align: left;">character</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">social_energy</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">alone_time_preference</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">talkativeness</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">deep_reflection</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">group_comfort</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">party_liking</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">listening_skill</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">empathy</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">creativity</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">organization</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">leadership</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">risk_taking</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">public_speaking_comfort</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">curiosity</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">routine_preference</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">excitement_seeking</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">friendliness</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">emotional_stability</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">planning</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">spontaneity</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">adventurousness</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reading_habit</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sports_interest</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">online_social_usage</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">travel_desire</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gadget_usage</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">work_style_collaborative</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">decision_speed</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">stress_handling</td>
+<td style="text-align: left;">numeric</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>There are 20000 number of rows and 30 columns.</p>
+</section>
+<section id="missing-data" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="missing-data"><span class="header-section-number">3.2</span> Missing data</h2>
+<p>This is synthetically simulated data so we don’t expect any discrepancies. We have already check about the missing values and duplicates in the data cleaning process (in the Scripts folder). We will add a vis miss plot here to double check. Furthermore, it is important to note that <span class="math inline">\(0\)</span> values are not missing, they are just values with low scoring for that particular variable.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vis_miss</span>(personality)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="vignette_files/figure-html/missing_data-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>As the plot shows above, there are no missing values.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="class-balance" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="class-balance"><span class="header-section-number">3.3</span> Class Balance</h2>
+<p>There are three classes in our dataset, introvert, extrovert, and ambivert. Although clustering does not use class labels during model fitting, examining class balance is important when labels are available because imbalance can influence cluster structure, distort evaluation metrics, and make interpretation of the resulting clusters less reliable. The graphs below show the class balance</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>personality_counts <span class="ot">&lt;-</span> personality <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(personality_type)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pie</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  personality_counts<span class="sc">$</span>n,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">paste0</span>(personality_counts<span class="sc">$</span>personality_type, </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                  <span class="st">" ("</span>, <span class="fu">round</span>(personality_counts<span class="sc">$</span>n <span class="sc">/</span> <span class="fu">sum</span>(personality_counts<span class="sc">$</span>n) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">"%)"</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Personality Type Distribution"</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="vignette_files/figure-html/class_balance-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>The figures show that classes are approximately distributed equally. This is good for later analysis.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="feature-analysis-and-variable-importance" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="feature-analysis-and-variable-importance"><span class="header-section-number">3.4</span> Feature Analysis and Variable Importance</h2>
+<p>We are using four clustering workflows: k-means, PAM, COP-k-means, and DBSCAN. All of these are sensitive to irrelevant or redundant variables. Distance-based methods such as k-means, PAM, and COP-k-means rely on Euclidean distances, so noisy or uninformative features can distort the distance structure and lead to poorly separated or unstable clusters. DBSCAN, while density-based, is also affected by high-dimensional noise because irrelevant variables make it harder to identify dense regions and choose meaningful <span class="math inline">\(\epsilon\)</span> neighborhoods. By identifying which variables contribute most to cluster separation, we reduce dimensionality, improve cluster stability, and ensure that the resulting supervised and unsupervised clusters reflect meaningful structure rather than artifacts of the feature space.</p>
+<p>Recall that all of our predictor variables are numeric and in the summary stats table above we have the means across each variable. We can deploy an ANOVA test to check whether there is any significant difference between the variables. This tells us how much each numeric variable differs between personality groups. In other words the variable that contributes most to the personality type would be the one with highest F-value.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exclude personality_type (response)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>numeric_vars <span class="ot">&lt;-</span> personality <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute ANOVA F-statistics for each variable</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>anova_results <span class="ot">&lt;-</span> <span class="fu">map_df</span>(<span class="fu">names</span>(numeric_vars), <span class="cf">function</span>(var) {</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  model <span class="ot">&lt;-</span> <span class="fu">aov</span>(personality[[var]] <span class="sc">~</span> personality<span class="sc">$</span>personality_type)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(model) <span class="sc">%&gt;%</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(term <span class="sc">!=</span> <span class="st">"Residuals"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">variable =</span> var) <span class="sc">%&gt;%</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(variable, statistic, p.value)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot variable importance</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>anova_results <span class="sc">%&gt;%</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(statistic)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(variable, statistic), <span class="at">y =</span> statistic)) <span class="sc">+</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"mistyrose1"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Variable Importance (ANOVA F-statistic)"</span>,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Variable"</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"F-Statistic"</span>) <span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="vignette_files/figure-html/variable_importance-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The ANOVA test tells us that the variable that’s going to be most distinguishing will be party liking. Variables that don’t have much sway are creativity, stress-handling, and emotional-stability.</p>
+</section>
+</section>
+<section id="supervised-clustering" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Supervised Clustering</h1>
+<p>Supervised clustering refers to clustering methods that incorporate constraints while forming clusters. These constraints can be also be user provided. It is used when some label information is available and we want the clusters to respect known relationships while still discovering structure in the data. We deploy two commonly used methods for supervised clustering: PAM and Constrainted KMeans with Background Knowledge to the personality dataset.</p>
+<section id="partitioning-around-medoids-pam" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="partitioning-around-medoids-pam"><span class="header-section-number">4.1</span> Partitioning Around Medoids (PAM)</h2>
+<p>Partitioning Around Medoids (PAM) is a classic clustering algorithm that forms groups by selecting actual data points, <strong>medoids</strong>, as the centers of clusters. PAM chooses representative points that minimize the total distance to other points in their cluster. This makes PAM robust to noise, outliers, and non-spherical cluster shapes. Quoting from the <code>cluster</code> package description: “the goal is to find <em>k</em> representative objects which minimize the sum of their dissimilarities of the observations to their closest representative object”, where the ‘representative object’ is a medoid.</p>
+<p>The workhorse function for PAM is the <code>pam()</code> function from the <code>cluster</code> package. This function requires an <code>x</code> argument, which is the data matrix or dataframe to perform clustering on, and a <code>k</code> argument which represents the number of clusters that we are looking for. There are a number of other optional arguments which enable flexibility for this function. In the function call below, we are specifying <code>diss = FALSE</code> to ensure that the function does not think <code>x</code> is a dissimilarity matrix, and <code>metric = "euclidean"</code> due to the multidimensional nature of our personality dataset. While some implementations of PAM require that the user manually finds medoids, this implementation conducts the search for a suitable initial set of medoids by itself.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>personality <span class="ot">&lt;-</span> personality <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">personality_type =</span> <span class="fu">as.factor</span>(personality_type)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>pam_clustered <span class="ot">&lt;-</span> <span class="fu">pam</span>(personality, <span class="dv">3</span>, <span class="at">diss =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">metric =</span> <span class="st">"euclidean"</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The results of the PAM model can be visualized by calling <code>plot()</code> upon the PAM model. Below, we can see that when <code>plot()</code> is called, we obtain a PCA-reminiscent plot of the personality data along two components that together explain 43.92% of the variability in the data. PAM has identified the three distinct clusters that stand out in this representation. We also obtain a numeric description of the clusters’ sizes and numeric widths in the component space.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pam_clustered, <span class="at">main =</span> <span class="st">"PAM Cluster Plot for Personality Data"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="vignette_files/figure-html/plot-pam-results-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="vignette_files/figure-html/plot-pam-results-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can obtain further results by inspecting the fitted elements of the PAM model directly. As seen below, the PAM model returns information about the medoids, their locations, the clusters and their sizes, and some other miscellaneous attributes of the data.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(pam_clustered)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "medoids"    "id.med"     "clustering" "objective"  "isolation" 
+ [6] "clusinfo"   "silinfo"    "diss"       "call"       "data"      </code></pre>
+</div>
+</div>
+<p>The most important information from the PAM model can be found by accessing the <code>medoids</code>, <code>clusinfo</code>, and <code>silinfo</code> attributes. The <code>medoids</code> attribute contains the values of each medoid along each variable in the data, as seen below.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>htmltools<span class="sc">::</span><span class="fu">div</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="at">style =</span> <span class="st">"height:270px; overflow-y: scroll; border:1px solid #ccc; padding:5px;"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>htmltools<span class="sc">::</span><span class="fu">HTML</span>(knitr<span class="sc">::</span><span class="fu">kable</span>(pam_clustered<span class="sc">$</span>medoids, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">caption =</span> <span class="st">"The mean of each variable across the three clusters"</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div style="height:270px; overflow-y: scroll; border:1px solid #ccc; padding:5px;">
+<table class="caption-top table table-sm table-striped small">
+<caption>The mean of each variable across the three clusters</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">personality_type</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">social_energy</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">alone_time_preference</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">talkativeness</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">deep_reflection</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">group_comfort</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">party_liking</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">listening_skill</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">empathy</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">creativity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">organization</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">leadership</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">risk_taking</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">public_speaking_comfort</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">curiosity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">routine_preference</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">excitement_seeking</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">friendliness</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">emotional_stability</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">planning</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">spontaneity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">adventurousness</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">reading_habit</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sports_interest</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">online_social_usage</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">travel_desire</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">gadget_usage</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">work_style_collaborative</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">decision_speed</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">stress_handling</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">7.406811</td>
+<td style="text-align: right;">2.235440</td>
+<td style="text-align: right;">9.172372</td>
+<td style="text-align: right;">3.586678</td>
+<td style="text-align: right;">8.306333</td>
+<td style="text-align: right;">7.659353</td>
+<td style="text-align: right;">5.861117</td>
+<td style="text-align: right;">5.148295</td>
+<td style="text-align: right;">5.595678</td>
+<td style="text-align: right;">4.315666</td>
+<td style="text-align: right;">7.531658</td>
+<td style="text-align: right;">7.437853</td>
+<td style="text-align: right;">7.520732</td>
+<td style="text-align: right;">6.050193</td>
+<td style="text-align: right;">3.539609</td>
+<td style="text-align: right;">7.586667</td>
+<td style="text-align: right;">8.451355</td>
+<td style="text-align: right;">6.036026</td>
+<td style="text-align: right;">4.976859</td>
+<td style="text-align: right;">7.643141</td>
+<td style="text-align: right;">8.090848</td>
+<td style="text-align: right;">5.917936</td>
+<td style="text-align: right;">4.516458</td>
+<td style="text-align: right;">8.984372</td>
+<td style="text-align: right;">7.646414</td>
+<td style="text-align: right;">6.560956</td>
+<td style="text-align: right;">8.552186</td>
+<td style="text-align: right;">6.468760</td>
+<td style="text-align: right;">7.047821</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.494743</td>
+<td style="text-align: right;">5.745152</td>
+<td style="text-align: right;">4.652769</td>
+<td style="text-align: right;">5.495603</td>
+<td style="text-align: right;">5.978168</td>
+<td style="text-align: right;">4.755904</td>
+<td style="text-align: right;">7.818847</td>
+<td style="text-align: right;">5.663815</td>
+<td style="text-align: right;">5.527899</td>
+<td style="text-align: right;">5.926737</td>
+<td style="text-align: right;">6.248520</td>
+<td style="text-align: right;">4.459779</td>
+<td style="text-align: right;">4.925115</td>
+<td style="text-align: right;">6.853544</td>
+<td style="text-align: right;">6.161454</td>
+<td style="text-align: right;">5.350742</td>
+<td style="text-align: right;">7.716442</td>
+<td style="text-align: right;">5.550136</td>
+<td style="text-align: right;">5.919260</td>
+<td style="text-align: right;">5.620713</td>
+<td style="text-align: right;">5.225287</td>
+<td style="text-align: right;">6.056601</td>
+<td style="text-align: right;">5.566365</td>
+<td style="text-align: right;">6.376277</td>
+<td style="text-align: right;">6.345300</td>
+<td style="text-align: right;">3.622792</td>
+<td style="text-align: right;">5.263834</td>
+<td style="text-align: right;">4.452687</td>
+<td style="text-align: right;">4.720935</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3.259337</td>
+<td style="text-align: right;">7.464871</td>
+<td style="text-align: right;">2.523655</td>
+<td style="text-align: right;">6.616111</td>
+<td style="text-align: right;">3.141268</td>
+<td style="text-align: right;">1.895573</td>
+<td style="text-align: right;">9.173012</td>
+<td style="text-align: right;">8.737643</td>
+<td style="text-align: right;">5.431702</td>
+<td style="text-align: right;">7.840322</td>
+<td style="text-align: right;">3.756620</td>
+<td style="text-align: right;">2.292241</td>
+<td style="text-align: right;">4.042761</td>
+<td style="text-align: right;">6.139455</td>
+<td style="text-align: right;">7.827334</td>
+<td style="text-align: right;">2.089178</td>
+<td style="text-align: right;">5.868511</td>
+<td style="text-align: right;">5.552662</td>
+<td style="text-align: right;">7.301337</td>
+<td style="text-align: right;">2.091976</td>
+<td style="text-align: right;">2.811703</td>
+<td style="text-align: right;">7.884244</td>
+<td style="text-align: right;">3.726055</td>
+<td style="text-align: right;">6.308437</td>
+<td style="text-align: right;">2.827615</td>
+<td style="text-align: right;">4.359291</td>
+<td style="text-align: right;">4.881269</td>
+<td style="text-align: right;">2.908636</td>
+<td style="text-align: right;">5.666559</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The <code>clusinfo</code> attribute contains information about the size and dissimilarities of each identified cluster, while the <code>silinfo</code> attribute describes the silhouette of the PAM model (a measurement of cluster consistency) and contains multiple smaller attributes - <code>widths</code> has information about the designated cluster and silhouette width of each individual data point, <code>clus.avg.widths</code> has the average silhouette width of each identified cluster, and <code>avg.width</code> is the average width across all clusters. Since <code>widths</code> is quite the long attribute, we will skip that and show <code>clus.avg.widths</code> instead.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>pam_clustered<span class="sc">$</span>clusinfo</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     size max_diss  av_diss diameter separation
+[1,] 6916 13.91928 9.023962 19.20332   5.652021
+[2,] 6725 13.54176 9.105314 20.78441   5.495476
+[3,] 6359 12.96615 8.997817 19.17771   5.495476</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(pam_clustered<span class="sc">$</span>silinfo)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "widths"          "clus.avg.widths" "avg.width"      </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pam_clustered<span class="sc">$</span>silinfo<span class="sc">$</span>clus.avg.widths</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2394656 0.1648012 0.2349622</code></pre>
+</div>
+</div>
+<p>We can also compare the cluster assignments of PAM with the true group labels of the data. The cluster assignments of PAM are found in the <code>clustering</code> attribute.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(pam_clustered<span class="sc">$</span>clustering, personality<span class="sc">$</span>personality_type)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   
+    Ambivert Extrovert Introvert
+  1       72      6844         0
+  2     6500        13       212
+  3        1         0      6358</code></pre>
+</div>
+</div>
+<p>As seen in the table above, the clustering results of PAM are extremely accurate. Ambivert seems like the hardest group to cluster correctly, which makes sense due to its position as a median group between extrovert and introvert.</p>
+</section>
+<section id="constrained-kmeans-with-background-knowledge-cop-kmeans" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="constrained-kmeans-with-background-knowledge-cop-kmeans"><span class="header-section-number">4.2</span> Constrained KMeans with Background Knowledge (COP KMeans)</h2>
+<p>Constrained K-Means (COP K-Means) extends the traditional K-means algorithm by incorporating background knowledge in the form of pairwise constraints. Unlike PAM, COP K-means requires the user to provide constraint sets. For the personality dataset with the outcome varaible as the <code>personality_type</code> we can construct constraints that mimic a realistic “semi-supervised” setting:</p>
+<ul>
+<li><p>Must-link: A few pairs of people with the same personality_type - these shouldn’t be separated by the clustering algorithm</p></li>
+<li><p>Cannot-Link: A few pairs of people with different personality_type - these shouldn’t be placed in the same cluster</p></li>
+</ul>
+<p>This uses the ground truth only to form constraints, not as a variable in the clustering.</p>
+<p><strong>COP K-means can be implemented with <code>conclust</code>. (Note: this package was removed from CRAN, and we are using a downloaded &amp; archived version of the <code>ckmeans()</code> function that is used to perform COP K-means clustering).</strong></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11302025</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># keep only numeric features</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>personality_num <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(personality[ , <span class="sc">-</span><span class="dv">1</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>We sample a handful of pairs to create small but meaningful constraint sets. These constraints are only for demonstration — in applied work, constraints come from domain experts.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ext <span class="ot">&lt;-</span> <span class="fu">which</span>(personality<span class="sc">$</span>personality_type <span class="sc">==</span> <span class="st">"Extrovert"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>int <span class="ot">&lt;-</span> <span class="fu">which</span>(personality<span class="sc">$</span>personality_type <span class="sc">==</span> <span class="st">"Introvert"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>amb <span class="ot">&lt;-</span> <span class="fu">which</span>(personality<span class="sc">$</span>personality_type <span class="sc">==</span> <span class="st">"Ambivert"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>must_link_pairs <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(ext, <span class="dv">2</span>),</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(int, <span class="dv">2</span>),</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(amb, <span class="dv">2</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co">#must_link_pairs</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>cant_link_pairs <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">sample</span>(ext, <span class="dv">1</span>), <span class="fu">sample</span>(int, <span class="dv">1</span>)),</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">sample</span>(int, <span class="dv">1</span>), <span class="fu">sample</span>(amb, <span class="dv">1</span>)),</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">sample</span>(ext, <span class="dv">1</span>), <span class="fu">sample</span>(amb, <span class="dv">1</span>))</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#cant_link_pairs</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>ck_clusters <span class="ot">&lt;-</span> <span class="fu">ckmeans</span>(</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> personality_num,</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">3</span>,</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">mustLink =</span> must_link_pairs,</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">cantLink =</span> cant_link_pairs,</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">maxIter =</span> <span class="dv">50</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ck_clusters, personality<span class="sc">$</span>personality_type)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           
+ck_clusters Ambivert Extrovert Introvert
+          1       14         0      6559
+          2       17      6842         0
+          3     6542        15        11</code></pre>
+</div>
+</div>
+<p>After identifying the must-link pairs and the can’t link pairs we fit the COP KMeans and obtain that Cluster 1: 6559 introverts, 14 ambiverts and 0 extroverts is clearly the introvert cluster. Cluster 2 is the Extrovert cluster and Cluster 3 is the Ambivert cluster. This is near-perfect recovery of personality type. COP-KMeans used only 6 constraints total: 3 must-link and 3 cannot-link. And still:</p>
+<p>Extroverts is 99.7% correctly clustered Introverts is 100% correctly clustered Ambiverts is 99% correctly clustered</p>
+<p>We can further visualize this with these plots. Here we are using PC1 and PC2 which are the principle components explaining most of the variability. Note, We are only using PCA for visualization, because this dataset is operating in 30+ dimensional space where plots are impossible to interpret directly. In fact, we did the same with PAM, when we call <code>pam()</code> it automatically produces a PCA projection internally.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PCA for plotting</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(personality_num, <span class="at">scale. =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>pca_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster =</span> <span class="fu">factor</span>(ck_clusters))</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pca_df, <span class="fu">aes</span>(PC1, PC2, <span class="at">color =</span> cluster)) <span class="sc">+</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"COP K-Means Clustering (PCA Projection)"</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"First two principal components"</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Cluster"</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="vignette_files/figure-html/copkmeans_plots-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For centers of each of the cluster means we can find each means and see how these are different across clusters. In both PAM and COP-KMeans, the cluster center (a medoid for PAM and a mean vector for K-Means) represents the “typical” or most representative profile of individuals in that cluster. Examining these centers allows us to interpret what distinguishes one cluster from another. By comparing centers across clusters, we can characterize the personality patterns each cluster captures and evaluate whether they align with known categories such as introverts, ambiverts, and extroverts.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cluster_centers <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>personality_num,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="at">by =</span> <span class="fu">list</span>(<span class="at">cluster =</span> ck_clusters),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="at">FUN =</span> mean</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>htmltools<span class="sc">::</span><span class="fu">div</span>(</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="at">style =</span> <span class="st">"height:250px; overflow-y: scroll; border:1px solid #ccc; padding:5px;"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>htmltools<span class="sc">::</span><span class="fu">HTML</span>(knitr<span class="sc">::</span><span class="fu">kable</span>(cluster_centers, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">caption =</span> <span class="st">"The mean of each variable across the three clusters"</span>))</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div style="height:250px; overflow-y: scroll; border:1px solid #ccc; padding:5px;">
+<table class="caption-top table table-sm table-striped small">
+<caption>The mean of each variable across the three clusters</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">cluster</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">social_energy</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">alone_time_preference</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">talkativeness</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">deep_reflection</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">group_comfort</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">party_liking</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">listening_skill</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">empathy</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">creativity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">organization</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">leadership</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">risk_taking</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">public_speaking_comfort</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">curiosity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">routine_preference</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">excitement_seeking</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">friendliness</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">emotional_stability</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">planning</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">spontaneity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">adventurousness</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">reading_habit</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sports_interest</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">online_social_usage</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">travel_desire</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">gadget_usage</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">work_style_collaborative</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">decision_speed</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">stress_handling</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.035966</td>
+<td style="text-align: right;">7.960657</td>
+<td style="text-align: right;">3.017551</td>
+<td style="text-align: right;">7.916957</td>
+<td style="text-align: right;">3.999220</td>
+<td style="text-align: right;">2.049341</td>
+<td style="text-align: right;">7.934069</td>
+<td style="text-align: right;">6.974338</td>
+<td style="text-align: right;">5.994112</td>
+<td style="text-align: right;">6.981851</td>
+<td style="text-align: right;">4.013274</td>
+<td style="text-align: right;">3.012814</td>
+<td style="text-align: right;">3.009615</td>
+<td style="text-align: right;">6.013120</td>
+<td style="text-align: right;">6.970762</td>
+<td style="text-align: right;">3.016264</td>
+<td style="text-align: right;">5.970622</td>
+<td style="text-align: right;">6.039957</td>
+<td style="text-align: right;">6.998589</td>
+<td style="text-align: right;">4.004509</td>
+<td style="text-align: right;">3.014832</td>
+<td style="text-align: right;">7.926978</td>
+<td style="text-align: right;">3.960899</td>
+<td style="text-align: right;">5.022474</td>
+<td style="text-align: right;">4.002698</td>
+<td style="text-align: right;">4.998792</td>
+<td style="text-align: right;">5.026432</td>
+<td style="text-align: right;">3.969896</td>
+<td style="text-align: right;">5.991588</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">7.902112</td>
+<td style="text-align: right;">3.007742</td>
+<td style="text-align: right;">7.949479</td>
+<td style="text-align: right;">4.031895</td>
+<td style="text-align: right;">7.958821</td>
+<td style="text-align: right;">7.961522</td>
+<td style="text-align: right;">5.998676</td>
+<td style="text-align: right;">6.005753</td>
+<td style="text-align: right;">6.002411</td>
+<td style="text-align: right;">4.993271</td>
+<td style="text-align: right;">7.941271</td>
+<td style="text-align: right;">6.941940</td>
+<td style="text-align: right;">7.923933</td>
+<td style="text-align: right;">6.973490</td>
+<td style="text-align: right;">3.980442</td>
+<td style="text-align: right;">7.942069</td>
+<td style="text-align: right;">7.925974</td>
+<td style="text-align: right;">6.018240</td>
+<td style="text-align: right;">5.022732</td>
+<td style="text-align: right;">6.957832</td>
+<td style="text-align: right;">6.978804</td>
+<td style="text-align: right;">3.981803</td>
+<td style="text-align: right;">6.983112</td>
+<td style="text-align: right;">7.931738</td>
+<td style="text-align: right;">6.977356</td>
+<td style="text-align: right;">6.987139</td>
+<td style="text-align: right;">7.932132</td>
+<td style="text-align: right;">7.004334</td>
+<td style="text-align: right;">5.965160</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5.485354</td>
+<td style="text-align: right;">5.502176</td>
+<td style="text-align: right;">5.505369</td>
+<td style="text-align: right;">6.011091</td>
+<td style="text-align: right;">6.000488</td>
+<td style="text-align: right;">4.982166</td>
+<td style="text-align: right;">7.002657</td>
+<td style="text-align: right;">6.490349</td>
+<td style="text-align: right;">5.991249</td>
+<td style="text-align: right;">5.987369</td>
+<td style="text-align: right;">6.023281</td>
+<td style="text-align: right;">4.997074</td>
+<td style="text-align: right;">5.498346</td>
+<td style="text-align: right;">6.504377</td>
+<td style="text-align: right;">5.472067</td>
+<td style="text-align: right;">5.522507</td>
+<td style="text-align: right;">6.989204</td>
+<td style="text-align: right;">5.989144</td>
+<td style="text-align: right;">6.001130</td>
+<td style="text-align: right;">5.459836</td>
+<td style="text-align: right;">5.022872</td>
+<td style="text-align: right;">5.998886</td>
+<td style="text-align: right;">5.468581</td>
+<td style="text-align: right;">6.479136</td>
+<td style="text-align: right;">5.482837</td>
+<td style="text-align: right;">5.992085</td>
+<td style="text-align: right;">6.485153</td>
+<td style="text-align: right;">5.509516</td>
+<td style="text-align: right;">5.989937</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>To see how each of the clusters are different than each other we use Silhoutte plot just like we did for PAM. The silhouette plot provides a visual summary of how well each observation fits within its assigned cluster relative to the other clusters. For each data point, the silhouette width ranges from –1 to 1 where values close to 1 indicates the observations are well matched to the clusters they are assigned to. Values close to 0 indicates that the observation is on the borders between the clusters. Negative values means that the point may have been miscalculated, meaning it is closer to another cluster than its assigned one.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>dist_mat <span class="ot">&lt;-</span> <span class="fu">dist</span>(personality_num)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>sil <span class="ot">&lt;-</span> <span class="fu">silhouette</span>(ck_clusters, dist_mat)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sil, <span class="at">main =</span> <span class="st">"Silhouette Plot for COP K-Means"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="vignette_files/figure-html/copkmeans_sil-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In the silhouette plot for COP K-Means, each bar represents an individual observation, grouped by cluster and sorted by silhouette width. The height and consistency of the bars show how tight and well-separated each cluster is. As we can see this is very similar to the PAM. Below is the summary table for the COP KMeans.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sil)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Silhouette of 20000 units in 3 clusters from silhouette.default(x = ck_clusters, dist = dist_mat) :
+ Cluster sizes and average silhouette widths:
+     6573      6859      6568 
+0.2284426 0.2320790 0.1709418 
+Individual silhouette widths:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-0.2878  0.1734  0.2122  0.2108  0.2533  0.3752 </code></pre>
+</div>
+</div>
+<p>Finally, we can cross check this with the truth. We can only do this because we are practicing Supervised Learning.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ck_clusters, personality<span class="sc">$</span>personality_type)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           
+ck_clusters Ambivert Extrovert Introvert
+          1       14         0      6559
+          2       17      6842         0
+          3     6542        15        11</code></pre>
+</div>
+</div>
+<p>As we can see from the table above, the COP KMeans clustering is very close to the ground truth. Ambivert seems like the hardest group to cluster correctly, which makes sense due to its position as a median group between extrovert and introvert.</p>
+</section>
+</section>
+<section id="unsupervised-learning" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Unsupervised Learning</h1>
+<section id="dbscan" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="dbscan"><span class="header-section-number">5.1</span> DBScan</h2>
+</section>
+<section id="kmeans" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="kmeans"><span class="header-section-number">5.2</span> KMeans</h2>
+</section>
+</section>
+<section id="conclusion" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Conclusion</h1>
+</section>
+<section id="references" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> References</h1>
+<!-- -->
 
+</section>
 
 </main>
 <!-- /main column -->
@@ -145,6 +1181,57 @@ ul.task-list li input[type="checkbox"] {
         container: window.document.getElementById('quarto-embedded-source-code-modal')
       });
       clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
@@ -474,7 +1561,348 @@ ul.task-list li input[type="checkbox"] {
       }
     }
   });
-  </script>
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Vignette: Guide to Supervised and Unsupervised Clustering"</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co">    number-sections: true</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="an">css:</span><span class="co"> bootstrap.css</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="an">authors:</span><span class="co"> Aarti Garaye, Josephine Kaminaga, Jimmy Wu, and Nicole Xu</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "`r Sys.Date()`"</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup, include=FALSE}</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="fu"># Abstract</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>Clustering is a fundamental tool in data analysis. It helps uncover latent structure, group similar observations, and identify meaningful patterns in unlabeled data. Because clustering is widely used across domains—from marketing and biology to social sciences and engineering—it is important to understand how different algorithms behave under varying data conditions. This vignette provides a practical, example-driven introduction to four different clustering methods. We deploy DBScan and Kmeans clustering for supervised clustering. For unsupervised we deploy Partitioning Around Medoids (PAM) and Constrained KMeans.</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>To illustrate these concepts, we use a synthetically generated <span class="co">[</span><span class="ot">personality dataset from Kaggle</span><span class="co">](https://www.kaggle.com/datasets/miadul/introvert-extrovert-and-ambivert-classification/data)</span>. The raw csv file is stored in the data folder of this repository. The dataset is designed to simulate human personality types — Introvert, Extrovert, and Ambivert — based on various behavioral and psychological traits. It containes 20,000 entries and 30 columns, including 29 numerical features representing personality indicators and 1 categorical (3 class) response variable (<span class="in">`personality_type`</span>). </span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>The goal of this vignette is to provide a clear, accessible guide for performing and interpreting clustering analyses. By walking through multiple algorithms on the same dataset, readers can compare outcomes, understand strengths and limitations, and gain intuition about when and why certain clustering methods are appropriate. This resource is intended to serve as a practical reference for students and practitioners who encounter clustering tasks in applied data projects.</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a><span class="fu"># Dataset Structure</span></span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>The dataset was obtained from Kaggle. It was synthetically generated using Python and NumPy. Feature distributions were modeled with class-specific means and added noise using a normal distribution to simulate natural variation.</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>**All feature values are numerical and scaled from 0 (low) to 10 (high).** </span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>Table: Personality Dataset Feature Descriptions</span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a>::: {.panel-body style="max-height:250px; overflow-y:auto;"}</span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Column Name               <span class="pp">|</span> Description                                           <span class="pp">|</span></span>
+<span id="cb29-36"><a href="#cb29-36" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------------------------|-------------------------------------------------------|</span></span>
+<span id="cb29-37"><a href="#cb29-37" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`personality_type`</span>        <span class="pp">|</span> Target variable: Introvert, Extrovert, or Ambivert    <span class="pp">|</span></span>
+<span id="cb29-38"><a href="#cb29-38" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`social_energy`</span>           <span class="pp">|</span> Tendency to gain energy from social interaction (0–10) <span class="pp">|</span></span>
+<span id="cb29-39"><a href="#cb29-39" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`alone_time_preference`</span>   <span class="pp">|</span> Comfort with solitude                                 <span class="pp">|</span></span>
+<span id="cb29-40"><a href="#cb29-40" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`talkativeness`</span>           <span class="pp">|</span> Propensity to engage in conversation                  <span class="pp">|</span></span>
+<span id="cb29-41"><a href="#cb29-41" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`deep_reflection`</span>         <span class="pp">|</span> Frequency of deep or introspective thinking           <span class="pp">|</span></span>
+<span id="cb29-42"><a href="#cb29-42" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`group_comfort`</span>           <span class="pp">|</span> Ease in group environments                            <span class="pp">|</span></span>
+<span id="cb29-43"><a href="#cb29-43" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`party_liking`</span>            <span class="pp">|</span> Enjoyment of parties and social events                <span class="pp">|</span></span>
+<span id="cb29-44"><a href="#cb29-44" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`listening_skills`</span>        <span class="pp">|</span> Active listening ability                              <span class="pp">|</span></span>
+<span id="cb29-45"><a href="#cb29-45" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`empathy`</span>                 <span class="pp">|</span> Ability to understand others’ emotions                <span class="pp">|</span></span>
+<span id="cb29-46"><a href="#cb29-46" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`creativity`</span>              <span class="pp">|</span> Tendency toward creative thinking                     <span class="pp">|</span></span>
+<span id="cb29-47"><a href="#cb29-47" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`organization`</span>            <span class="pp">|</span> Preference for order, structure, and plans            <span class="pp">|</span></span>
+<span id="cb29-48"><a href="#cb29-48" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`leadership`</span>             <span class="pp">|</span> Comfort in leading others                              <span class="pp">|</span></span>
+<span id="cb29-49"><a href="#cb29-49" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`risk_taking`</span>             <span class="pp">|</span> Willingness to take risks                             <span class="pp">|</span></span>
+<span id="cb29-50"><a href="#cb29-50" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`public_speaking_comfort`</span> <span class="pp">|</span> Comfort level in public speaking situations           <span class="pp">|</span></span>
+<span id="cb29-51"><a href="#cb29-51" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`curiosity`</span>               <span class="pp">|</span> Interest in learning or exploring                     <span class="pp">|</span></span>
+<span id="cb29-52"><a href="#cb29-52" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`routine_preference`</span>      <span class="pp">|</span> Preference for routine vs. spontaneity                <span class="pp">|</span></span>
+<span id="cb29-53"><a href="#cb29-53" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`excitement_seeking`</span>      <span class="pp">|</span> Desire for new and stimulating experiences            <span class="pp">|</span></span>
+<span id="cb29-54"><a href="#cb29-54" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`friendliness`</span>            <span class="pp">|</span> General social warmth and approachability             <span class="pp">|</span></span>
+<span id="cb29-55"><a href="#cb29-55" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`emotional_stability`</span>     <span class="pp">|</span> Ability to remain calm and balanced under stress      <span class="pp">|</span></span>
+<span id="cb29-56"><a href="#cb29-56" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`planning`</span>                <span class="pp">|</span> Tendency to plan ahead                                <span class="pp">|</span></span>
+<span id="cb29-57"><a href="#cb29-57" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`spontaneity`</span>             <span class="pp">|</span> Acting on impulse or without planning                 <span class="pp">|</span></span>
+<span id="cb29-58"><a href="#cb29-58" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`adventurousness`</span>         <span class="pp">|</span> Willingness to try new and risky activities           <span class="pp">|</span></span>
+<span id="cb29-59"><a href="#cb29-59" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`reading_habit`</span>           <span class="pp">|</span> Frequency of reading books or articles                <span class="pp">|</span></span>
+<span id="cb29-60"><a href="#cb29-60" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`sports_interest`</span>         <span class="pp">|</span> Level of interest in sports or physical activities    <span class="pp">|</span></span>
+<span id="cb29-61"><a href="#cb29-61" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`online_social_usage`</span>     <span class="pp">|</span> Time spent on social media and online interaction     <span class="pp">|</span></span>
+<span id="cb29-62"><a href="#cb29-62" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`travel_desire`</span>           <span class="pp">|</span> Interest in travel and exploring new places           <span class="pp">|</span></span>
+<span id="cb29-63"><a href="#cb29-63" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`gadget_usage`</span>            <span class="pp">|</span> Frequency of gadget or tech device use                <span class="pp">|</span></span>
+<span id="cb29-64"><a href="#cb29-64" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`work_style_collaborative`</span><span class="pp">|</span> Preference for teamwork vs. solo work                 <span class="pp">|</span></span>
+<span id="cb29-65"><a href="#cb29-65" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`decision_speed`</span>          <span class="pp">|</span> How quickly decisions are made                        <span class="pp">|</span></span>
+<span id="cb29-66"><a href="#cb29-66" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`stress_handling`</span>         <span class="pp">|</span> Ability to manage stress effectively                  <span class="pp">|</span></span>
+<span id="cb29-67"><a href="#cb29-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-68"><a href="#cb29-68" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb29-69"><a href="#cb29-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-70"><a href="#cb29-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Disclaimer</span></span>
+<span id="cb29-71"><a href="#cb29-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-72"><a href="#cb29-72" aria-hidden="true" tabindex="-1"></a>**This is a synthetic dataset created for research, learning, and experimental purposes only. It does not represent real individuals or real-world psychometrics.**</span>
+<span id="cb29-73"><a href="#cb29-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-74"><a href="#cb29-74" aria-hidden="true" tabindex="-1"></a><span class="fu"># Exploratory Analysis</span></span>
+<span id="cb29-75"><a href="#cb29-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-76"><a href="#cb29-76" aria-hidden="true" tabindex="-1"></a><span class="fu">## Loading Libraries and Exploring the Data Struction</span></span>
+<span id="cb29-77"><a href="#cb29-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-78"><a href="#cb29-78" aria-hidden="true" tabindex="-1"></a>The code above loads the necessary libraries and the data from the data folder</span>
+<span id="cb29-79"><a href="#cb29-79" aria-hidden="true" tabindex="-1"></a><span class="in">```{r loading_libs, warning=FALSE, message=FALSE}</span></span>
+<span id="cb29-80"><a href="#cb29-80" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb29-81"><a href="#cb29-81" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb29-82"><a href="#cb29-82" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(visdat)</span>
+<span id="cb29-83"><a href="#cb29-83" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb29-84"><a href="#cb29-84" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb29-85"><a href="#cb29-85" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb29-86"><a href="#cb29-86" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb29-87"><a href="#cb29-87" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb29-88"><a href="#cb29-88" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb29-89"><a href="#cb29-89" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb29-90"><a href="#cb29-90" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster)</span>
+<span id="cb29-91"><a href="#cb29-91" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb29-92"><a href="#cb29-92" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb29-93"><a href="#cb29-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-94"><a href="#cb29-94" aria-hidden="true" tabindex="-1"></a>personality <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/raw/personality_synthetic_dataset.csv"</span>)</span>
+<span id="cb29-95"><a href="#cb29-95" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"Scripts/ckmeans.R"</span>)</span>
+<span id="cb29-96"><a href="#cb29-96" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-97"><a href="#cb29-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-98"><a href="#cb29-98" aria-hidden="true" tabindex="-1"></a>The table shows each variable class.</span>
+<span id="cb29-101"><a href="#cb29-101" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-102"><a href="#cb29-102" aria-hidden="true" tabindex="-1"></a>personality <span class="sc">%&gt;%</span></span>
+<span id="cb29-103"><a href="#cb29-103" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">class</span>(.x)[<span class="dv">1</span>])) <span class="sc">%&gt;%</span></span>
+<span id="cb29-104"><a href="#cb29-104" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"class"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb29-105"><a href="#cb29-105" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Column Name"</span>, <span class="st">"Class"</span>), <span class="at">caption =</span> <span class="st">"Variable Type in the Dataset"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb29-106"><a href="#cb29-106" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">height =</span> <span class="st">"200px"</span>)</span>
+<span id="cb29-107"><a href="#cb29-107" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-108"><a href="#cb29-108" aria-hidden="true" tabindex="-1"></a>There are <span class="in">`r nrow(personality)`</span> number of rows and <span class="in">`r ncol(personality)`</span> columns.</span>
+<span id="cb29-109"><a href="#cb29-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-110"><a href="#cb29-110" aria-hidden="true" tabindex="-1"></a><span class="fu">## Missing data</span></span>
+<span id="cb29-111"><a href="#cb29-111" aria-hidden="true" tabindex="-1"></a>This is synthetically simulated data so we don't expect any discrepancies. We have already check about the missing values and duplicates in the data cleaning process (in the Scripts folder). We will add a vis miss plot here to double check. Furthermore, it is important to note that $0$ values are not missing, they are just values with low scoring for that particular variable. </span>
+<span id="cb29-112"><a href="#cb29-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-113"><a href="#cb29-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{r missing_data, fig.align='center', fig.cap="As the plot shows above, there are no missing values."}</span></span>
+<span id="cb29-114"><a href="#cb29-114" aria-hidden="true" tabindex="-1"></a><span class="fu">vis_miss</span>(personality)</span>
+<span id="cb29-115"><a href="#cb29-115" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-116"><a href="#cb29-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-117"><a href="#cb29-117" aria-hidden="true" tabindex="-1"></a><span class="fu">## Class Balance</span></span>
+<span id="cb29-118"><a href="#cb29-118" aria-hidden="true" tabindex="-1"></a>There are three classes in our dataset, introvert, extrovert, and ambivert. Although clustering does not use class labels during model fitting, examining class balance is important when labels are available because imbalance can influence cluster structure, distort evaluation metrics, and make interpretation of the resulting clusters less reliable. The graphs below show the class balance</span>
+<span id="cb29-119"><a href="#cb29-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-120"><a href="#cb29-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{r class_balance, fig.cap="The figures show that classes are approximately distributed equally. This is good for later analysis."}</span></span>
+<span id="cb29-121"><a href="#cb29-121" aria-hidden="true" tabindex="-1"></a>personality_counts <span class="ot">&lt;-</span> personality <span class="sc">%&gt;%</span></span>
+<span id="cb29-122"><a href="#cb29-122" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(personality_type)</span>
+<span id="cb29-123"><a href="#cb29-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-124"><a href="#cb29-124" aria-hidden="true" tabindex="-1"></a><span class="fu">pie</span>(</span>
+<span id="cb29-125"><a href="#cb29-125" aria-hidden="true" tabindex="-1"></a>  personality_counts<span class="sc">$</span>n,</span>
+<span id="cb29-126"><a href="#cb29-126" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">paste0</span>(personality_counts<span class="sc">$</span>personality_type, </span>
+<span id="cb29-127"><a href="#cb29-127" aria-hidden="true" tabindex="-1"></a>                  <span class="st">" ("</span>, <span class="fu">round</span>(personality_counts<span class="sc">$</span>n <span class="sc">/</span> <span class="fu">sum</span>(personality_counts<span class="sc">$</span>n) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">"%)"</span>),</span>
+<span id="cb29-128"><a href="#cb29-128" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Personality Type Distribution"</span></span>
+<span id="cb29-129"><a href="#cb29-129" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-130"><a href="#cb29-130" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-131"><a href="#cb29-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-132"><a href="#cb29-132" aria-hidden="true" tabindex="-1"></a><span class="fu">## Feature Analysis and Variable Importance</span></span>
+<span id="cb29-133"><a href="#cb29-133" aria-hidden="true" tabindex="-1"></a>We are using four clustering workflows: k-means, PAM, COP-k-means, and DBSCAN. All of these are sensitive to irrelevant or redundant variables. Distance-based methods such as k-means, PAM, and COP-k-means rely on Euclidean distances, so noisy or uninformative features can distort the distance structure and lead to poorly separated or unstable clusters. DBSCAN, while density-based, is also affected by high-dimensional noise because irrelevant variables make it harder to identify dense regions and choose meaningful $\epsilon$ neighborhoods. By identifying which variables contribute most to cluster separation, we reduce dimensionality, improve cluster stability, and ensure that the resulting supervised and unsupervised clusters reflect meaningful structure rather than artifacts of the feature space. </span>
+<span id="cb29-134"><a href="#cb29-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-135"><a href="#cb29-135" aria-hidden="true" tabindex="-1"></a>Recall that all of our predictor variables are numeric and in the summary stats table above we have the means across each variable. We can deploy an ANOVA test to check whether there is any significant difference between the variables. This tells us how much each numeric variable differs between personality groups. In other words the variable that contributes most to the personality type would be the one with highest F-value. </span>
+<span id="cb29-136"><a href="#cb29-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-137"><a href="#cb29-137" aria-hidden="true" tabindex="-1"></a><span class="in">```{r variable_importance, message=FALSE, warning=FALSE}</span></span>
+<span id="cb29-138"><a href="#cb29-138" aria-hidden="true" tabindex="-1"></a><span class="co"># Exclude personality_type (response)</span></span>
+<span id="cb29-139"><a href="#cb29-139" aria-hidden="true" tabindex="-1"></a>numeric_vars <span class="ot">&lt;-</span> personality <span class="sc">%&gt;%</span> </span>
+<span id="cb29-140"><a href="#cb29-140" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric))</span>
+<span id="cb29-141"><a href="#cb29-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-142"><a href="#cb29-142" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute ANOVA F-statistics for each variable</span></span>
+<span id="cb29-143"><a href="#cb29-143" aria-hidden="true" tabindex="-1"></a>anova_results <span class="ot">&lt;-</span> <span class="fu">map_df</span>(<span class="fu">names</span>(numeric_vars), <span class="cf">function</span>(var) {</span>
+<span id="cb29-144"><a href="#cb29-144" aria-hidden="true" tabindex="-1"></a>  model <span class="ot">&lt;-</span> <span class="fu">aov</span>(personality[[var]] <span class="sc">~</span> personality<span class="sc">$</span>personality_type)</span>
+<span id="cb29-145"><a href="#cb29-145" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(model) <span class="sc">%&gt;%</span></span>
+<span id="cb29-146"><a href="#cb29-146" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(term <span class="sc">!=</span> <span class="st">"Residuals"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb29-147"><a href="#cb29-147" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">variable =</span> var) <span class="sc">%&gt;%</span></span>
+<span id="cb29-148"><a href="#cb29-148" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(variable, statistic, p.value)</span>
+<span id="cb29-149"><a href="#cb29-149" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb29-150"><a href="#cb29-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-151"><a href="#cb29-151" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot variable importance</span></span>
+<span id="cb29-152"><a href="#cb29-152" aria-hidden="true" tabindex="-1"></a>anova_results <span class="sc">%&gt;%</span></span>
+<span id="cb29-153"><a href="#cb29-153" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(statistic)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-154"><a href="#cb29-154" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(variable, statistic), <span class="at">y =</span> statistic)) <span class="sc">+</span></span>
+<span id="cb29-155"><a href="#cb29-155" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"mistyrose1"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb29-156"><a href="#cb29-156" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb29-157"><a href="#cb29-157" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Variable Importance (ANOVA F-statistic)"</span>,</span>
+<span id="cb29-158"><a href="#cb29-158" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Variable"</span>,</span>
+<span id="cb29-159"><a href="#cb29-159" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"F-Statistic"</span>) <span class="sc">+</span></span>
+<span id="cb29-160"><a href="#cb29-160" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span>
+<span id="cb29-161"><a href="#cb29-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-162"><a href="#cb29-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-163"><a href="#cb29-163" aria-hidden="true" tabindex="-1"></a>The ANOVA test tells us that the variable that's going to be most distinguishing will be party liking. Variables that don't have much sway are creativity, stress-handling, and emotional-stability. </span>
+<span id="cb29-164"><a href="#cb29-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-165"><a href="#cb29-165" aria-hidden="true" tabindex="-1"></a><span class="fu"># Supervised Clustering</span></span>
+<span id="cb29-166"><a href="#cb29-166" aria-hidden="true" tabindex="-1"></a>Supervised clustering refers to clustering methods that incorporate constraints while forming clusters. These constraints can be also be user provided. It is used when some label information is available and we want the clusters to respect known relationships while still discovering structure in the data. We deploy two commonly used methods for supervised clustering: PAM and Constrainted KMeans with Background Knowledge to the personality dataset. </span>
+<span id="cb29-167"><a href="#cb29-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-168"><a href="#cb29-168" aria-hidden="true" tabindex="-1"></a><span class="fu">## Partitioning Around Medoids (PAM)</span></span>
+<span id="cb29-169"><a href="#cb29-169" aria-hidden="true" tabindex="-1"></a>Partitioning Around Medoids (PAM) is a classic clustering algorithm that forms groups by selecting actual data points, **medoids**, as the centers of clusters. PAM chooses representative points that minimize the total distance to other points in their cluster. This makes PAM robust to noise, outliers, and non-spherical cluster shapes. Quoting from the <span class="in">`cluster`</span> package description: "the goal is to find *k* representative objects which minimize the sum of their dissimilarities of the observations to their closest representative object", where the 'representative object' is a medoid. </span>
+<span id="cb29-170"><a href="#cb29-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-171"><a href="#cb29-171" aria-hidden="true" tabindex="-1"></a>The workhorse function for PAM is the <span class="in">`pam()`</span> function from the <span class="in">`cluster`</span> package. This function requires an <span class="in">`x`</span> argument, which is the data matrix or dataframe to perform clustering on, and a <span class="in">`k`</span> argument which represents the number of clusters that we are looking for. There are a number of other optional arguments which enable flexibility for this function. In the function call below, we are specifying <span class="in">`diss = FALSE`</span> to ensure that the function does not think <span class="in">`x`</span> is a dissimilarity matrix, and <span class="in">`metric = "euclidean"`</span> due to the multidimensional nature of our personality dataset. While some implementations of PAM require that the user manually finds medoids, this implementation conducts the search for a suitable initial set of medoids by itself.</span>
+<span id="cb29-172"><a href="#cb29-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-173"><a href="#cb29-173" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fit-pam}</span></span>
+<span id="cb29-174"><a href="#cb29-174" aria-hidden="true" tabindex="-1"></a>personality <span class="ot">&lt;-</span> personality <span class="sc">|&gt;</span></span>
+<span id="cb29-175"><a href="#cb29-175" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb29-176"><a href="#cb29-176" aria-hidden="true" tabindex="-1"></a>    <span class="at">personality_type =</span> <span class="fu">as.factor</span>(personality_type)</span>
+<span id="cb29-177"><a href="#cb29-177" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb29-178"><a href="#cb29-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-179"><a href="#cb29-179" aria-hidden="true" tabindex="-1"></a>pam_clustered <span class="ot">&lt;-</span> <span class="fu">pam</span>(personality, <span class="dv">3</span>, <span class="at">diss =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb29-180"><a href="#cb29-180" aria-hidden="true" tabindex="-1"></a>    <span class="at">metric =</span> <span class="st">"euclidean"</span></span>
+<span id="cb29-181"><a href="#cb29-181" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-182"><a href="#cb29-182" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-183"><a href="#cb29-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-184"><a href="#cb29-184" aria-hidden="true" tabindex="-1"></a>The results of the PAM model can be visualized by calling <span class="in">`plot()`</span> upon the PAM model. Below, we can see that when <span class="in">`plot()`</span> is called, we obtain a PCA-reminiscent plot of the personality data along two components that together explain 43.92% of the variability in the data. PAM has identified the three distinct clusters that stand out in this representation. We also obtain a numeric description of the clusters' sizes and numeric widths in the component space.</span>
+<span id="cb29-185"><a href="#cb29-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-186"><a href="#cb29-186" aria-hidden="true" tabindex="-1"></a><span class="in">```{r plot-pam-results}</span></span>
+<span id="cb29-187"><a href="#cb29-187" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pam_clustered, <span class="at">main =</span> <span class="st">"PAM Cluster Plot for Personality Data"</span>)</span>
+<span id="cb29-188"><a href="#cb29-188" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-189"><a href="#cb29-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-190"><a href="#cb29-190" aria-hidden="true" tabindex="-1"></a>We can obtain further results by inspecting the fitted elements of the PAM model directly. As seen below, the PAM model returns information about the medoids, their locations, the clusters and their sizes, and some other miscellaneous attributes of the data.</span>
+<span id="cb29-191"><a href="#cb29-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-192"><a href="#cb29-192" aria-hidden="true" tabindex="-1"></a><span class="in">```{r inspect-pam-results}</span></span>
+<span id="cb29-193"><a href="#cb29-193" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(pam_clustered)</span>
+<span id="cb29-194"><a href="#cb29-194" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-195"><a href="#cb29-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-196"><a href="#cb29-196" aria-hidden="true" tabindex="-1"></a>The most important information from the PAM model can be found by accessing the <span class="in">`medoids`</span>, <span class="in">`clusinfo`</span>, and <span class="in">`silinfo`</span> attributes. The <span class="in">`medoids`</span> attribute contains the values of each medoid along each variable in the data, as seen below.</span>
+<span id="cb29-197"><a href="#cb29-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-198"><a href="#cb29-198" aria-hidden="true" tabindex="-1"></a><span class="in">```{r medoids}</span></span>
+<span id="cb29-199"><a href="#cb29-199" aria-hidden="true" tabindex="-1"></a>htmltools<span class="sc">::</span><span class="fu">div</span>(</span>
+<span id="cb29-200"><a href="#cb29-200" aria-hidden="true" tabindex="-1"></a><span class="at">style =</span> <span class="st">"height:270px; overflow-y: scroll; border:1px solid #ccc; padding:5px;"</span>,</span>
+<span id="cb29-201"><a href="#cb29-201" aria-hidden="true" tabindex="-1"></a>htmltools<span class="sc">::</span><span class="fu">HTML</span>(knitr<span class="sc">::</span><span class="fu">kable</span>(pam_clustered<span class="sc">$</span>medoids, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">caption =</span> <span class="st">"The mean of each variable across the three clusters"</span>))</span>
+<span id="cb29-202"><a href="#cb29-202" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-203"><a href="#cb29-203" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-204"><a href="#cb29-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-205"><a href="#cb29-205" aria-hidden="true" tabindex="-1"></a>The <span class="in">`clusinfo`</span> attribute contains information about the size and dissimilarities of each identified cluster, while the <span class="in">`silinfo`</span> attribute describes the silhouette of the PAM model (a measurement of cluster consistency) and contains multiple smaller attributes - <span class="in">`widths`</span> has information about the designated cluster and silhouette width of each individual data point, <span class="in">`clus.avg.widths`</span> has the average silhouette width of each identified cluster, and <span class="in">`avg.width`</span> is the average width across all clusters. Since <span class="in">`widths`</span> is quite the long attribute, we will skip that and show <span class="in">`clus.avg.widths`</span> instead.</span>
+<span id="cb29-206"><a href="#cb29-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-207"><a href="#cb29-207" aria-hidden="true" tabindex="-1"></a><span class="in">```{r pam_info}</span></span>
+<span id="cb29-208"><a href="#cb29-208" aria-hidden="true" tabindex="-1"></a>pam_clustered<span class="sc">$</span>clusinfo</span>
+<span id="cb29-209"><a href="#cb29-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-210"><a href="#cb29-210" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(pam_clustered<span class="sc">$</span>silinfo)</span>
+<span id="cb29-211"><a href="#cb29-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-212"><a href="#cb29-212" aria-hidden="true" tabindex="-1"></a>pam_clustered<span class="sc">$</span>silinfo<span class="sc">$</span>clus.avg.widths</span>
+<span id="cb29-213"><a href="#cb29-213" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-214"><a href="#cb29-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-215"><a href="#cb29-215" aria-hidden="true" tabindex="-1"></a>We can also compare the cluster assignments of PAM with the true group labels of the data. The cluster assignments of PAM are found in the <span class="in">`clustering`</span> attribute.</span>
+<span id="cb29-216"><a href="#cb29-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-217"><a href="#cb29-217" aria-hidden="true" tabindex="-1"></a><span class="in">```{r pam_table}</span></span>
+<span id="cb29-218"><a href="#cb29-218" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(pam_clustered<span class="sc">$</span>clustering, personality<span class="sc">$</span>personality_type)</span>
+<span id="cb29-219"><a href="#cb29-219" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-220"><a href="#cb29-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-221"><a href="#cb29-221" aria-hidden="true" tabindex="-1"></a>As seen in the table above, the clustering results of PAM are extremely accurate. Ambivert seems like the hardest group to cluster correctly, which makes sense due to its position as a median group between extrovert and introvert.</span>
+<span id="cb29-222"><a href="#cb29-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-223"><a href="#cb29-223" aria-hidden="true" tabindex="-1"></a><span class="fu">## Constrained KMeans with Background Knowledge (COP KMeans)</span></span>
+<span id="cb29-224"><a href="#cb29-224" aria-hidden="true" tabindex="-1"></a>Constrained K-Means (COP K-Means) extends the traditional K-means algorithm by incorporating background knowledge in the form of pairwise constraints. Unlike PAM, COP K-means requires the user to provide constraint sets. For the personality dataset with the outcome varaible as the <span class="in">`personality_type`</span> we can construct constraints that mimic a realistic "semi-supervised" setting: </span>
+<span id="cb29-225"><a href="#cb29-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-226"><a href="#cb29-226" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Must-link: A few pairs of people with the same personality_type</span>
+<span id="cb29-227"><a href="#cb29-227" aria-hidden="true" tabindex="-1"></a><span class="ss">      - </span>these shouldn’t be separated by the clustering algorithm</span>
+<span id="cb29-228"><a href="#cb29-228" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb29-229"><a href="#cb29-229" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cannot-Link: A few pairs of people with different personality_type</span>
+<span id="cb29-230"><a href="#cb29-230" aria-hidden="true" tabindex="-1"></a><span class="ss">      - </span>these shouldn’t be placed in the same cluster</span>
+<span id="cb29-231"><a href="#cb29-231" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb29-232"><a href="#cb29-232" aria-hidden="true" tabindex="-1"></a>This uses the ground truth only to form constraints, not as a variable in the clustering.</span>
+<span id="cb29-233"><a href="#cb29-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-234"><a href="#cb29-234" aria-hidden="true" tabindex="-1"></a>**COP K-means can be implemented with `conclust`. (Note: this package was removed from CRAN, and we are using a downloaded &amp; archived version of the `ckmeans()` function that is used to perform COP K-means clustering).**</span>
+<span id="cb29-235"><a href="#cb29-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-236"><a href="#cb29-236" aria-hidden="true" tabindex="-1"></a><span class="in">```{r personality_num}</span></span>
+<span id="cb29-237"><a href="#cb29-237" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11302025</span>)</span>
+<span id="cb29-238"><a href="#cb29-238" aria-hidden="true" tabindex="-1"></a><span class="co"># keep only numeric features</span></span>
+<span id="cb29-239"><a href="#cb29-239" aria-hidden="true" tabindex="-1"></a>personality_num <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(personality[ , <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb29-240"><a href="#cb29-240" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-241"><a href="#cb29-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-242"><a href="#cb29-242" aria-hidden="true" tabindex="-1"></a>We sample a handful of pairs to create small but meaningful constraint sets. These constraints are only for demonstration — in applied work, constraints come from domain experts. </span>
+<span id="cb29-243"><a href="#cb29-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-244"><a href="#cb29-244" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fitting_cpkmeans}</span></span>
+<span id="cb29-245"><a href="#cb29-245" aria-hidden="true" tabindex="-1"></a>ext <span class="ot">&lt;-</span> <span class="fu">which</span>(personality<span class="sc">$</span>personality_type <span class="sc">==</span> <span class="st">"Extrovert"</span>)</span>
+<span id="cb29-246"><a href="#cb29-246" aria-hidden="true" tabindex="-1"></a>int <span class="ot">&lt;-</span> <span class="fu">which</span>(personality<span class="sc">$</span>personality_type <span class="sc">==</span> <span class="st">"Introvert"</span>)</span>
+<span id="cb29-247"><a href="#cb29-247" aria-hidden="true" tabindex="-1"></a>amb <span class="ot">&lt;-</span> <span class="fu">which</span>(personality<span class="sc">$</span>personality_type <span class="sc">==</span> <span class="st">"Ambivert"</span>)</span>
+<span id="cb29-248"><a href="#cb29-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-249"><a href="#cb29-249" aria-hidden="true" tabindex="-1"></a>must_link_pairs <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb29-250"><a href="#cb29-250" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(ext, <span class="dv">2</span>),</span>
+<span id="cb29-251"><a href="#cb29-251" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(int, <span class="dv">2</span>),</span>
+<span id="cb29-252"><a href="#cb29-252" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(amb, <span class="dv">2</span>)</span>
+<span id="cb29-253"><a href="#cb29-253" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-254"><a href="#cb29-254" aria-hidden="true" tabindex="-1"></a><span class="co">#must_link_pairs</span></span>
+<span id="cb29-255"><a href="#cb29-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-256"><a href="#cb29-256" aria-hidden="true" tabindex="-1"></a>cant_link_pairs <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb29-257"><a href="#cb29-257" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">sample</span>(ext, <span class="dv">1</span>), <span class="fu">sample</span>(int, <span class="dv">1</span>)),</span>
+<span id="cb29-258"><a href="#cb29-258" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">sample</span>(int, <span class="dv">1</span>), <span class="fu">sample</span>(amb, <span class="dv">1</span>)),</span>
+<span id="cb29-259"><a href="#cb29-259" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">sample</span>(ext, <span class="dv">1</span>), <span class="fu">sample</span>(amb, <span class="dv">1</span>))</span>
+<span id="cb29-260"><a href="#cb29-260" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-261"><a href="#cb29-261" aria-hidden="true" tabindex="-1"></a><span class="co">#cant_link_pairs</span></span>
+<span id="cb29-262"><a href="#cb29-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-263"><a href="#cb29-263" aria-hidden="true" tabindex="-1"></a>ck_clusters <span class="ot">&lt;-</span> <span class="fu">ckmeans</span>(</span>
+<span id="cb29-264"><a href="#cb29-264" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> personality_num,</span>
+<span id="cb29-265"><a href="#cb29-265" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">3</span>,</span>
+<span id="cb29-266"><a href="#cb29-266" aria-hidden="true" tabindex="-1"></a>  <span class="at">mustLink =</span> must_link_pairs,</span>
+<span id="cb29-267"><a href="#cb29-267" aria-hidden="true" tabindex="-1"></a>  <span class="at">cantLink =</span> cant_link_pairs,</span>
+<span id="cb29-268"><a href="#cb29-268" aria-hidden="true" tabindex="-1"></a>  <span class="at">maxIter =</span> <span class="dv">50</span></span>
+<span id="cb29-269"><a href="#cb29-269" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-270"><a href="#cb29-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-271"><a href="#cb29-271" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ck_clusters, personality<span class="sc">$</span>personality_type)</span>
+<span id="cb29-272"><a href="#cb29-272" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-273"><a href="#cb29-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-274"><a href="#cb29-274" aria-hidden="true" tabindex="-1"></a>After identifying the must-link pairs and the can't link pairs we fit the COP KMeans and obtain that Cluster 1: 6559 introverts, 14 ambiverts and 0 extroverts is clearly the introvert cluster. Cluster 2 is the Extrovert cluster and Cluster 3 is the Ambivert cluster. This is near-perfect recovery of personality type. COP-KMeans used only 6 constraints total: 3 must-link and 3 cannot-link. And still:</span>
+<span id="cb29-275"><a href="#cb29-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-276"><a href="#cb29-276" aria-hidden="true" tabindex="-1"></a>Extroverts is 99.7% correctly clustered</span>
+<span id="cb29-277"><a href="#cb29-277" aria-hidden="true" tabindex="-1"></a>Introverts is 100% correctly clustered</span>
+<span id="cb29-278"><a href="#cb29-278" aria-hidden="true" tabindex="-1"></a>Ambiverts is 99% correctly clustered</span>
+<span id="cb29-279"><a href="#cb29-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-280"><a href="#cb29-280" aria-hidden="true" tabindex="-1"></a>We can further visualize this with these plots. Here we are using PC1 and PC2 which are the principle components explaining most of the variability. Note, We are only using PCA for visualization, because this dataset is operating in 30+ dimensional space where plots are impossible to interpret directly. In fact, we did the same with PAM, when we call <span class="in">`pam()`</span> it automatically produces a PCA projection internally.</span>
+<span id="cb29-281"><a href="#cb29-281" aria-hidden="true" tabindex="-1"></a><span class="in">```{r copkmeans_plots}</span></span>
+<span id="cb29-282"><a href="#cb29-282" aria-hidden="true" tabindex="-1"></a><span class="co"># PCA for plotting</span></span>
+<span id="cb29-283"><a href="#cb29-283" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(personality_num, <span class="at">scale. =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb29-284"><a href="#cb29-284" aria-hidden="true" tabindex="-1"></a>pca_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
+<span id="cb29-285"><a href="#cb29-285" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster =</span> <span class="fu">factor</span>(ck_clusters))</span>
+<span id="cb29-286"><a href="#cb29-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-287"><a href="#cb29-287" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pca_df, <span class="fu">aes</span>(PC1, PC2, <span class="at">color =</span> cluster)) <span class="sc">+</span></span>
+<span id="cb29-288"><a href="#cb29-288" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb29-289"><a href="#cb29-289" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb29-290"><a href="#cb29-290" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"COP K-Means Clustering (PCA Projection)"</span>,</span>
+<span id="cb29-291"><a href="#cb29-291" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"First two principal components"</span>,</span>
+<span id="cb29-292"><a href="#cb29-292" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Cluster"</span></span>
+<span id="cb29-293"><a href="#cb29-293" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb29-294"><a href="#cb29-294" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span>
+<span id="cb29-295"><a href="#cb29-295" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-296"><a href="#cb29-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-297"><a href="#cb29-297" aria-hidden="true" tabindex="-1"></a>For centers of each of the cluster means we can find each means and see how these are different across clusters. In both PAM and COP-KMeans, the cluster center (a medoid for PAM and a mean vector for K-Means) represents the “typical” or most representative profile of individuals in that cluster. Examining these centers allows us to interpret what distinguishes one cluster from another. By comparing centers across clusters, we can characterize the personality patterns each cluster captures and evaluate whether they align with known categories such as introverts, ambiverts, and extroverts. </span>
+<span id="cb29-298"><a href="#cb29-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-299"><a href="#cb29-299" aria-hidden="true" tabindex="-1"></a><span class="in">```{r copkmeans_table}</span></span>
+<span id="cb29-300"><a href="#cb29-300" aria-hidden="true" tabindex="-1"></a>cluster_centers <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(</span>
+<span id="cb29-301"><a href="#cb29-301" aria-hidden="true" tabindex="-1"></a>personality_num,</span>
+<span id="cb29-302"><a href="#cb29-302" aria-hidden="true" tabindex="-1"></a><span class="at">by =</span> <span class="fu">list</span>(<span class="at">cluster =</span> ck_clusters),</span>
+<span id="cb29-303"><a href="#cb29-303" aria-hidden="true" tabindex="-1"></a><span class="at">FUN =</span> mean</span>
+<span id="cb29-304"><a href="#cb29-304" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-305"><a href="#cb29-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-306"><a href="#cb29-306" aria-hidden="true" tabindex="-1"></a>htmltools<span class="sc">::</span><span class="fu">div</span>(</span>
+<span id="cb29-307"><a href="#cb29-307" aria-hidden="true" tabindex="-1"></a><span class="at">style =</span> <span class="st">"height:250px; overflow-y: scroll; border:1px solid #ccc; padding:5px;"</span>,</span>
+<span id="cb29-308"><a href="#cb29-308" aria-hidden="true" tabindex="-1"></a>htmltools<span class="sc">::</span><span class="fu">HTML</span>(knitr<span class="sc">::</span><span class="fu">kable</span>(cluster_centers, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">caption =</span> <span class="st">"The mean of each variable across the three clusters"</span>))</span>
+<span id="cb29-309"><a href="#cb29-309" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-310"><a href="#cb29-310" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-311"><a href="#cb29-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-312"><a href="#cb29-312" aria-hidden="true" tabindex="-1"></a>To see how each of the clusters are different than each other we use Silhoutte plot just like we did for PAM. The silhouette plot provides a visual summary of how well each observation fits within its assigned cluster relative to the other clusters. For each data point, the silhouette width ranges from –1 to 1 where values close to 1 indicates the observations are well matched to the clusters they are assigned to. Values close to 0 indicates that the observation is on the borders between the clusters. Negative values means that the point may have been miscalculated, meaning it is closer to another cluster than its assigned one.</span>
+<span id="cb29-313"><a href="#cb29-313" aria-hidden="true" tabindex="-1"></a><span class="in">```{r copkmeans_sil}</span></span>
+<span id="cb29-314"><a href="#cb29-314" aria-hidden="true" tabindex="-1"></a>dist_mat <span class="ot">&lt;-</span> <span class="fu">dist</span>(personality_num)</span>
+<span id="cb29-315"><a href="#cb29-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-316"><a href="#cb29-316" aria-hidden="true" tabindex="-1"></a>sil <span class="ot">&lt;-</span> <span class="fu">silhouette</span>(ck_clusters, dist_mat)</span>
+<span id="cb29-317"><a href="#cb29-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-318"><a href="#cb29-318" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sil, <span class="at">main =</span> <span class="st">"Silhouette Plot for COP K-Means"</span>)</span>
+<span id="cb29-319"><a href="#cb29-319" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-320"><a href="#cb29-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-321"><a href="#cb29-321" aria-hidden="true" tabindex="-1"></a>In the silhouette plot for COP K-Means, each bar represents an individual observation, grouped by cluster and sorted by silhouette width. The height and consistency of the bars show how tight and well-separated each cluster is. As we can see this is very similar to the PAM. Below is the summary table for the COP KMeans.</span>
+<span id="cb29-322"><a href="#cb29-322" aria-hidden="true" tabindex="-1"></a><span class="in">```{r summ-sil}</span></span>
+<span id="cb29-323"><a href="#cb29-323" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sil)</span>
+<span id="cb29-324"><a href="#cb29-324" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-325"><a href="#cb29-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-326"><a href="#cb29-326" aria-hidden="true" tabindex="-1"></a>Finally, we can cross check this with the truth. We can only do this because we are practicing Supervised Learning.</span>
+<span id="cb29-327"><a href="#cb29-327" aria-hidden="true" tabindex="-1"></a><span class="in">```{r truth-cpkmeans}</span></span>
+<span id="cb29-328"><a href="#cb29-328" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ck_clusters, personality<span class="sc">$</span>personality_type)</span>
+<span id="cb29-329"><a href="#cb29-329" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-330"><a href="#cb29-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-331"><a href="#cb29-331" aria-hidden="true" tabindex="-1"></a>As we can see from the table above, the COP KMeans clustering is very close to the ground truth. Ambivert seems like the hardest group to cluster correctly, which makes sense due to its position as a median group between extrovert and introvert. </span>
+<span id="cb29-332"><a href="#cb29-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-333"><a href="#cb29-333" aria-hidden="true" tabindex="-1"></a><span class="fu"># Unsupervised Learning</span></span>
+<span id="cb29-334"><a href="#cb29-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-335"><a href="#cb29-335" aria-hidden="true" tabindex="-1"></a><span class="fu">## DBScan</span></span>
+<span id="cb29-336"><a href="#cb29-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-337"><a href="#cb29-337" aria-hidden="true" tabindex="-1"></a><span class="fu">## KMeans</span></span>
+<span id="cb29-338"><a href="#cb29-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-339"><a href="#cb29-339" aria-hidden="true" tabindex="-1"></a><span class="fu"># Conclusion</span></span>
+<span id="cb29-340"><a href="#cb29-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-341"><a href="#cb29-341" aria-hidden="true" tabindex="-1"></a><span class="fu"># References</span></span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
 </div> <!-- /content -->
 
 

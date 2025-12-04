@@ -200,7 +200,7 @@ k_best <- 2
 km_final <- kmeans(dat_scaled, centers = k_best, nstart = 50)
 
 # Adding assigned clusters to data for plotting results
-dat_clusters <- dat_raw %>%
+dat_clusters <- dat_num %>%
   filter(complete.cases(dat_num)) %>%
   mutate(cluster = factor(km_final$cluster))
 
