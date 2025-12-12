@@ -75,7 +75,7 @@ Table: Personality Dataset Feature Descriptions
 
 ## Loading Libraries and Exploring the Data Struction
 
-The code above loads the necessary libraries and the data from the data folder
+The code below loads the necessary libraries and the data from the data folder
 ```{r loading_libs, warning=FALSE, message=FALSE}
 library(readr)
 library(readxl)
@@ -329,7 +329,7 @@ As we can see from the table above, the COP KMeans clustering is very close to t
 In this section we will walk through an implementation of DBSCAN, a density based clustering algorithm that groups data points based on how close they are in the feature space. This algorithm differs from other clustering algorithms such as k-means and hierarchical in that it works well with arbitrarily shaped clusters, as well as dealing with outliers and noise. This implementation will be using the `dbscan` R package.
 
 In order to cluster the data, we remove the predictor column since we are using an unsupervised learning method.
-```{r}
+```{r dbscan_preprocess}
 personality_cluster <- personality %>% select(-personality_type)
 ```
 
@@ -339,7 +339,7 @@ DBSCAN works by categorizing data points into core points (sufficient number of 
 
 We first visualize a knee plot to determine the most optimal epsilon value for DBSCAN clustering. According to _Schubert, E., Sander, J., Ester, M., Kriegel, H. P., & Xu, X. (2017). DBSCAN revisited, revisited: why and how you should (still) use DBSCAN. ACM Transactions on Database Systems (TODS), 42(3), 19_, for two-dimensional data use a default value of minPts=4. For more than 2 dimensions, define minPts=2*dim. Once you know which minPts to choose, you can determine epsilon by plotting the k-distances with k=minPts. Find the 'knee' in the graph and that corresponding k-distance value is your epsilon value.
 
-```{r}
+```{r dbscan_minpts}
 #setting the value of minimum points and choosing k from the knee plot
 set.seed(1)
 min_pts = 2*dim(personality_cluster)[2]
@@ -347,7 +347,7 @@ kNNdistplot(personality_cluster, k = min_pts)
 ```
 
 In the above plot, we see that the 'knee' occurs around 7 so we set our epsilon value to 7 and run `dbscan`.
-```{r}
+```{r dbscan_run}
 set.seed(1)
 pers_dbscan <- dbscan(personality_cluster, eps = 7, minPts = min_pts)
 pers_dbscan
@@ -356,14 +356,14 @@ pers_dbscan
 We see that it has returned clusters 0, 1, 2, 3. In DBSCAN, a value of 0 means that the algorithm decided that point did not fall into any cluster, aka a noise point. Of the 20000 data points, 12081 were classified as noise points, while the rest fell into one of the three clusters. Overall, the size of clusters appear fairly balanced, however the success rate of assigning every point to a cluster is quite low.
 
 We remove the noise points and visualize our clusters using the `factoextra` package. This package automatically performs PCA to reduce the dimensionality, and plots the first two principal components.
-```{r}
+```{r dbscan_plot}
 pers_combined <- personality %>% mutate(cluster = pers_dbscan$cluster) %>% filter(cluster != 0)
 
 fviz_cluster(list(clusters = pers_combined[,31], data = pers_combined[,2:30]), geom = "point", ellipse = TRUE, main = "DBScan Clustering w/o noise values") + theme_bw()
 ```
 The visualization shows 3 strong clusters with some overlap, which follows general intuition about personality types. We see also that PC1 captures 47.9% of the variation between data points.
 
-```{r}
+```{r dbscan_summary}
 pers_summary_transpose <- pers_combined %>% group_by(cluster) %>% summarise(across(where(is.numeric), mean, .names = "mean_{.col}"), .groups = "drop") %>% t()
 colnames(pers_summary_transpose) <- pers_summary_transpose[1,]
 pers_summary_transpose <- pers_summary_transpose[-1,]
@@ -506,9 +506,9 @@ By contrast, DBSCAN uses a density-based approach, which is advantageous for dis
 
 Conclusively, the comparison reveals that while all methods capture the dominant personality dimension, their effectiveness depends on the assumptions they impose. K-means is efficient and stable for large numeric datasets; PAM offers robustness and interpretability; COP-KMeans excels when slight supervision is available; and DBSCAN is best suited for non-spherical clusters and outlier detection. These results demonstrate how clustering algorithms with different philosophies can provide complementary perspectives while ultimately converging on the same core structure within the data.
 
-Furthermore, it is important to note that this was a synthetically generated dataset. Real world dataset might have problems dealing with correaltion, missing data, class imbalance (although all four clustering methods perform relatively well with class imbalance datasets as well). If you have highly correlated dataset you might expect a wider spread in the clusters. Our dataset had a lot of correlation too (see the heatmap in the [EDA section](https://github.com/pstat197/vignette-Supervised-Unsupervised-Clustering/blob/main/Scripts/drafts/ExploratoryAnalysis.Rmd)), however, the methods we deployed could correctly identify the clusters. With a lot of correlation you might expect wider clusters since the model will be confusing the correlation between variables more than they are actually used for predicting the personaility type. This exact reason is why we see wider clusters when we have correlation. 
+Furthermore, it is important to note that this was a synthetically generated dataset. Real world dataset might have problems dealing with correlation, missing data, class imbalance (although all four clustering methods perform relatively well with class imbalance datasets as well). If you have highly correlated dataset you might expect a wider spread in the clusters. Our dataset had a lot of correlation too (see the heatmap in the [EDA section](https://github.com/pstat197/vignette-Supervised-Unsupervised-Clustering/blob/main/Scripts/drafts/ExploratoryAnalysis.Rmd)), however, the methods we deployed could correctly identify the clusters. With a lot of correlation you might expect wider clusters since the model will be confusing the correlation between variables more than they are actually used for predicting the personality type. This exact reason is why we see wider clusters when we have correlation. 
 
-If the boundaries are getting blurry when you have correlation, please refer to other resources to deal with your correlation accordingly. Some suggestions from us is deploying a variable selection method before continuing with clustering. Some common variable selection methods widely used are Lasso (if the data is linear), Randomized Lasso, Elastic Net, Stepwise selection, Graphical Modelling, Principle Component Analysis (PCA was done in the code for visualizing some of the clustering methods we used as well), and even some Tree-Based importance methods. 
+If the boundaries are getting blurry when you have correlation, please refer to other resources to deal with your correlation accordingly. Some suggestions from us are deploying a variable selection method before continuing with clustering. Some common variable selection methods widely used are Lasso (if the data is linear), Randomized Lasso, Elastic Net, Stepwise selection, Graphical Modelling, Principle Component Analysis (PCA was done in the code for visualizing some of the clustering methods we used as well), and even some Tree-Based importance methods. 
 
 # References
 
